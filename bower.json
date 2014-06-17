@@ -1,0 +1,20 @@
+{
+  "name": "capi5k-openstack",
+  "version": "0.0.0",
+  "homepage": "https://github.com/capi5k/capi5k-openstack",
+  "authors": [
+    "msimonin <matthieu.simonin@inria.fr>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies" : 
+  {
+    "capi5k-puppetcluster": "https://github.com/capi5k/capi5k-puppetcluster/tarball/master"
+  } 
+}
