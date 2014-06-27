@@ -1,4 +1,6 @@
-capi5k-init 
-===========
+capi5k-openstack
+=================
 
-* used by xpm init
+* ``` xpm install ```
+* ``` bundle install ```
+* ```cap automatic puppetcluster openstack```
