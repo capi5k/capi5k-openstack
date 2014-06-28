@@ -55,13 +55,16 @@ namespace :openstack do
     task :prepare, :roles => [:puppet_master] do
       set :user, "root"
       run "#{puppet_p} module install puppetlabs-openstack"
+      upload "#{openstack_path}/openstackg5k", "/etc/puppet/modules", :via => :scp, :recursive => :true
     end 
-    
+
+=begin 
     task :patchs, :roles => [:puppet_master] do
       set :user, "root"
       upload "#{openstack_path}/patchs/params.pp", "/etc/puppet/modules/neutron/manifests/params.pp"
       upload "#{openstack_path}/patchs/ovs.pp", "/etc/puppet/modules/neutron/manifests/plugins/ovs.pp"
     end
+=end
   end
 
   namespace :hiera do
@@ -139,15 +142,18 @@ namespace :openstack do
       controller = find_servers :roles => [:controller]
       manifest = %{
         node '#{controller.first.host}' {
-          include openstack::role::controller
+          include openstackg5k::role::controller
         }
       }
       compute = find_servers :roles => [:compute]
-      manifest << %{
-        node '#{compute.first.host}' {
-          include openstack::role::compute
+      compute.each do |c|
+        manifest << %{
+          node '#{compute.first.host}' {
+            include openstackg5k::role::compute
+          }
         }
-      }
+      end
+
       storage = find_servers :roles => [:storage]
       manifest << %{
         node '#{storage.first.host}' {

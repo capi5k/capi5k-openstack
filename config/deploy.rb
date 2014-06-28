@@ -14,6 +14,7 @@ end
 
 load "config/deploy/xp5k.rb"
 load "config/lib/spinner.rb"
+load "config/lib/vlan.rb"
 
 # load recipes of dependencies
 recipes = Dir.glob("#{recipes_path}/*");
