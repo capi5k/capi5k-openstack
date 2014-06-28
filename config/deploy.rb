@@ -13,7 +13,6 @@ if File.exist?(conn_config)
 end
 
 load "config/deploy/xp5k.rb"
-load "config/lib/spinner.rb"
 load "config/lib/vlan.rb"
 
 # load recipes of dependencies
