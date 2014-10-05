@@ -4,6 +4,7 @@ def translate_vlan(nodes, vlan = "-1")
   end
 
   to_translate = nodes
+  puts to_translate.inspect
   if !nodes.respond_to?('each')
     to_translate = [nodes]
   end
