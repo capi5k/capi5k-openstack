@@ -16,7 +16,7 @@ def role_puppet_clients
 end
 
 def puppet_version
-  "3.5.1"
+  "3.7.1"
 end
 
 

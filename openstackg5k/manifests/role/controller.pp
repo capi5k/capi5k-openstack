@@ -7,11 +7,11 @@ class openstackg5k::role::controller inherits ::openstack::role {
   class { '::openstack::profile::keystone': } ->
   class { '::openstack::profile::ceilometer::api': } ->
   class { '::openstack::profile::glance::auth': } ->
-  class { '::openstack::profile::glance::api': } ->
+  class { '::openstackg5k::profile::glance::api': } ->
   class { '::openstack::profile::cinder::api': } ->
   class { '::openstackg5k::profile::nova::api': } ->
   class { '::openstack::profile::heat::api': } ->
   class { '::openstack::profile::horizon': } ->
-  class { '::openstackg5k::profile::nfs::server': }
+  #  class { '::openstackg5k::profile::nfs::server': }
   class { '::openstack::profile::auth_file': }
 }

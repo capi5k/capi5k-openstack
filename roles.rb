@@ -12,8 +12,9 @@ def role_controller
   translate_vlan($myxp.get_deployed_nodes('capi5k-init')[1], "#{vlan}")
 end
 
+# TODO setting to another node seems to not validate a constraints when puppet agent runs
 def role_storage
-  translate_vlan($myxp.get_deployed_nodes('capi5k-init')[2], "#{vlan}")
+  translate_vlan($myxp.get_deployed_nodes('capi5k-init')[1], "#{vlan}")
 end
 
 def role_compute

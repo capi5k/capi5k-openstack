@@ -6,6 +6,7 @@ end
 desc 'Submit jobs'
 task :submit do
   $myxp.submit
+  $myxp.wait_for_jobs
 end
 
 desc 'Deploy with Kadeploy'

@@ -30,7 +30,6 @@ class openstackg5k::common::nova ($is_compute    = false) {
     admin_password                       => hiera('openstack::nova::password'),
     auth_host                            => $controller_management_address,
     enabled                              => $is_controller,
-    neutron_metadata_proxy_shared_secret => hiera('openstack::neutron::shared_secret'),
   }
 
   class { '::nova::vncproxy':

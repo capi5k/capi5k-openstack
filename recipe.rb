@@ -13,6 +13,7 @@
 # # your recipe here
 # end
 require 'netaddr'
+require 'hiera'
 
 set :openstack_path, "."
 
@@ -41,7 +42,7 @@ namespace :openstack do
     task :default do
       proxy 
       prepare
-      patchs
+      #patchs
     end
 
     # Put it in puppet recipe
@@ -99,7 +100,7 @@ namespace :openstack do
       controller.each do |c| 
         @controllerAddress = capture "facter ipaddress", :hosts => c
         @controllerAddress = @controllerAddress.gsub("\n", "")
-        @allowedHost = @controllerAddress.gsub(/(\d)+$/, "%")
+        @allowedHost = @controllerAddress.gsub(/(\d)+\.(\d)+$/, "%.%")
         puts @allowedHost
       end
       storage = find_servers :roles => [:storage]
@@ -120,7 +121,7 @@ namespace :openstack do
 
     task :install, :roles => [:puppet_master] do
       set :user, "root"
-      upload("#{openstack_path}/hiera","/etc/puppet/hiera", :via => :scp, :recursive => true)
+      upload("#{openstack_path}/hiera","/etc/puppet", :via => :scp, :recursive => true)
       run("mv /etc/puppet/hiera/hiera.yaml /etc/puppet/.")
     end
 
@@ -143,29 +144,31 @@ namespace :openstack do
       manifest = %{
         node '#{controller.first.host}' {
           include openstackg5k::role::controller
+#          include openstack::role::storage
         }
       }
+      manifest2 = %{}
       compute = find_servers :roles => [:compute]
       compute.each do |c|
         manifest << %{
-          node '#{compute.first.host}' {
-            include openstackg5k::role::compute
+          node '#{c}' {
+            class{'::openstackg5k::role::compute':}
+          }
+        }
+        # we fix the network after the first run
+        manifest2 << %{
+          node '#{c}' {
+            class{'::openstackg5k::profile::nova::nova-legacy-net-compute':}
           }
         }
       end
-
-      storage = find_servers :roles => [:storage]
-      manifest << %{
-        node '#{storage.first.host}' {
-          include openstack::role::storage
-        }
-      }
       File.write('tmp/site.pp', manifest)
+      File.write('tmp/site_ntx.pp', manifest2)
     end
-
     task :transfer, :roles => [:puppet_master] do
       set :user, 'root'
       upload "#{openstack_path}/tmp/site.pp", "/etc/puppet/manifests/", :via => :scp
+      upload "#{openstack_path}/tmp/site_ntx.pp", "/etc/puppet/manifests/", :via => :scp
     end
 
   end # sitepp
@@ -182,16 +185,90 @@ namespace :openstack do
     task :default do
       controller
       others
+      network::default
     end
 
-    task :controller, :roles => [:controller] do
+    desc 'Provision the controller'
+    task :controller, :roles => [:controller], :on_error => :continue do
       set :user, "root"
       run "puppet agent -t"
     end
 
+    desc 'Provision the other nodes'
     task :others, :roles => [:storage, :compute] do
       set :user, "root"
       run "puppet agent -t"
+    end
+  
+    namespace :network do
+      desc 'Install the legacy network'
+      task :default do
+        network_manifest
+        network_apply
+      end
+
+      task :network_manifest, :roles => [:puppet_master] do
+        set :user, "root"
+        run "cp /etc/puppet/manifests/site.pp /etc/puppet/manifests/site.pp.old"
+        run "cp /etc/puppet/manifests/site_ntx.pp /etc/puppet/manifests/site.pp"
+      end
+
+      task :network_apply, :roles => [:compute] do
+        set :user, "root"
+        run "puppet agent -t"
+      end
+    end
+  end
+
+  namespace :bootstrap do
+    desc 'Bootstrap the environment (add image/sec-group/network)' 
+    task :default do
+      upload_keys
+      configure
+    end
+
+    task :upload_keys, :roles => [:controller] do
+      set :user, "root"
+      upload "#{openstack_path}/keys/id_rsa.pub", ".ssh/id_rsa.pub", :via => :scp
+      upload "#{openstack_path}/keys/id_rsa", ".ssh/id_rsa", :via => :scp
+    end
+
+
+    task :configure, :roles => [:controller] do
+      set :default_environment, {
+          'OS_USERNAME'            => 'admin',
+          'OS_PASSWORD'            => 'fyby-tet',
+          'OS_TENANT_NAME'         => 'admin',
+          'OS_AUTH_URL'            =>'http://localhost:5000/v2.0/',
+          'OS_REGION_NAME'         =>'openstack',
+          'KEYSTONE_ENDPOINT_TYPE' =>'publicURL',
+          'NOVA_ENDPOINT_TYPE'     =>'publicURL'
+      }
+      set :user, "root"
+      controllerAddress = capture "facter ipaddress"
+      # we choose a range of ips which doen't collide with any host of g5k 
+      # see https://www.grid5000.fr/mediawiki/index.php/User:Lnussbaum/Network#KaVLAN
+      # here 255 hosts only
+      nova_net = controllerAddress.gsub(/(\d)+\.(\d)+$/, "230.0/24")
+      run "nova keypair-add --pub_key /root/.ssh/id_rsa.pub jdoe_key"
+      run "nova secgroup-create vm_jdoe_sec_group 'vm_jdoe_sec_group test security group'"
+      run "nova secgroup-add-rule vm_jdoe_sec_group tcp 22 22 0.0.0.0/0"
+      run "nova secgroup-add-rule vm_jdoe_sec_group tcp 80 80 0.0.0.0/0"
+      run "nova secgroup-add-rule vm_jdoe_sec_group icmp -1 -1 0.0.0.0/0"
+      run "nova secgroup-list-rules vm_jdoe_sec_group"
+      run "wget http://apt.grid5000.fr/cloud/ubuntu-12.04-server-cloudimg-amd64-disk1.img -O /tmp/ubuntu-12.04-server-cloudimg-amd64-disk1.img"
+      run "glance add name='ubuntu-image' is_public=true container_format=ovf disk_format=qcow2 < /tmp/ubuntu-12.04-server-cloudimg-amd64-disk1.img"
+      run "nova network-create net-jdoe --bridge br100 --multi-host T --fixed-range-v4 #{nova_net}"
+      # run some checks
+      run "nova net-list"
+      run "nova secgroup-list"
+      run "nova image-list"
+    end
+
+    desc 'reminder about booting a VMs'
+    task :boot do
+      puts "You are now ready to boot a VM : (change the net-id) "
+      puts "nova boot --flavor 3 --security_groups vm_jdoe_sec_group --image ubuntu-image --nic net-id=a665bfd4-53da-41a8-9bd6-bab03c09b890 --key_name jdoe_key  ubuntu-vm"
     end
 
   end

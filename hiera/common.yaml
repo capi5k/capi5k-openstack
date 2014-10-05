@@ -1,14 +1,14 @@
 openstack::region: 'openstack'
 
 ######## Networks
-openstack::network::api: "%{::network_br100}/14"
-openstack::network::external: "%{::network_br100}/14"
-openstack::network::management: "%{::network_br100}/14"
-openstack::network::data: "%{::network_br100}/14"
+openstack::network::api: "%{::network_br100}/18"
+openstack::network::external: "%{::network_br100}/18"
+openstack::network::management: "%{::network_br100}/18"
+openstack::network::data: "%{::network_br100}/18"
 
-openstack::network::external::ippool::start: 10.31.216.0
-openstack::network::external::ippool::end: 10.31.217.255
-openstack::network::external::gateway: 10.31.255.254
+openstack::network::external::ippool::start: 10.27.216.0
+openstack::network::external::ippool::end: 10.27.217.255
+openstack::network::external::gateway: 10.27.255.254
 openstack::network::external::dns: 131.254.203.235
 
 
@@ -18,16 +18,16 @@ openstack::network::neutron::private: "%{::network_br100}/14"
 
 ######## Fixed IPs (controllers)
 
-openstack::controller::address::api: "10.31.206.50"
-openstack::controller::address::management: "10.31.206.50"
-openstack::storage::address::api: "10.31.206.51"
-openstack::storage::address::management: "10.31.206.51"
+openstack::controller::address::api: "10.27.204.138"
+openstack::controller::address::management: "10.27.204.138"
+openstack::storage::address::api: "10.27.204.138"
+openstack::storage::address::management: "10.27.204.138"
 
 ######## Database
 
 openstack::mysql::root_password: 'spam-gak'
 openstack::mysql::service_password: 'fuva-wax'
-openstack::mysql::allowed_hosts: ['localhost', '127.0.0.1', "10.31.206.%" ]
+openstack::mysql::allowed_hosts: ['localhost', '127.0.0.1', "10.27.%.%" ]
 
 ######## RabbitMQ
 
