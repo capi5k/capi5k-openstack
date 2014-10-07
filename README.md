@@ -9,7 +9,32 @@ capi5k-openstack
 
 ## check the deployment
 
-* cap describe
+* ```cap describe```
+
+```
++----------------------------------------------------------------------+
+|puppet_master                 parapluie-31-kavlan-16.rennes.grid5000.fr|
++----------------------------------------------------------------------+
+|puppet_clients                parapluie-8-kavlan-16.rennes.grid5000.fr|
+|                              parapluie-32-kavlan-16.rennes.grid5000.fr|
+|                              parapluie-35-kavlan-16.rennes.grid5000.fr|
+|                              parapluie-38-kavlan-16.rennes.grid5000.fr|
++----------------------------------------------------------------------+
+|controller                    parapluie-32-kavlan-16.rennes.grid5000.fr|
++----------------------------------------------------------------------+
+|storage                       parapluie-32-kavlan-16.rennes.grid5000.fr|
++----------------------------------------------------------------------+
+|openstack                     parapluie-8-kavlan-16.rennes.grid5000.fr|
+|                              parapluie-32-kavlan-16.rennes.grid5000.fr|
+|                              parapluie-35-kavlan-16.rennes.grid5000.fr|
+|                              parapluie-38-kavlan-16.rennes.grid5000.fr|
++----------------------------------------------------------------------+
+|compute                       parapluie-8-kavlan-16.rennes.grid5000.fr|
+|                              parapluie-38-kavlan-16.rennes.grid5000.fr|
++----------------------------------------------------------------------+
+|frontend                      rennes                                  |
++----------------------------------------------------------------------+
+```
 * ssh to controller as root
 * (controller) ```source openrc```
 * (controller) ```nova-manage service list | sort```
