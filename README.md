@@ -71,3 +71,4 @@ nova keypair-list
 ```
 (laptop) ssh -NL 8000:parapluie-32-kavlan-16.rennes.grid5000.fr:80 access.grid5000.fr
 ```
+And then visit ```http:127.0.0.1:8000/horizon```
