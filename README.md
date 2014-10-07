@@ -69,5 +69,5 @@ nova keypair-list
 # Using the web Gui
 
 ```
-(lapltop) ssh -NL 8000:parapluie-32-kavlan-16.rennes.grid5000.fr:80 access.grid5000.fr
+(laptop) ssh -NL 8000:parapluie-32-kavlan-16.rennes.grid5000.fr:80 access.grid5000.fr
 ```
