@@ -11,11 +11,10 @@ capi5k-openstack
 
 * cap describe
 * ssh to controller as root
-* (controller) source openrc
-* (controller) nova-manage service list | sort
+* (controller) ```source openrc```
+* (controller) ```nova-manage service list | sort```
 
-```
-/python2.7/dist-packages/nova/servicegroup/drivers/db.py:71
+```bash
 Binary           Host                                 Zone             Status     State Updated_At
 nova-cert        parapluie-32-kavlan-16.rennes.grid5000.fr internal         enabled    :-)   2014-10-07 14:49:18
 nova-cert        parapluie-38-kavlan-16.rennes.grid5000.fr internal         enabled    XXX   None
