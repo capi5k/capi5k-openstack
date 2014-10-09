@@ -1,6 +1,8 @@
 capi5k-openstack
 =================
 
+Prerequisites : see http://capi5k.github.io/capi5k/
+
 * ``` xpm install ```
 * ``` bundle install ```
 * ```cap automatic ; cap puppetcluster; cap puppetcluster; cap openstack; cap openstack:run_agents:network```
