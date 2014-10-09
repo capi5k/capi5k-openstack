@@ -5,7 +5,7 @@ require 'erb'
 
 # G5K global parameters
 set :site, ENV['site'] || "rennes"
-set :walltime, ENV['walltime'] || "04:00:00"
+set :walltime, ENV['walltime'] || "07:30:00"
 set :subnet, ENV['subnet'] || "slash_18"
 set :vlan, ENV['vlan'] || "16"
 
@@ -20,7 +20,7 @@ $myxp.define_job({
   :retry      => true,
   :goal       => "100%",
   :types      => ["deploy"],
-  :name       => "init" , 
+  :name       => "openstack" , 
   :roles      =>  [
     XP5K::Role.new({ :name => 'capi5k-init', :size => 5 }),
   ],

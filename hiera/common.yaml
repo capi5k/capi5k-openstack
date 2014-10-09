@@ -18,10 +18,10 @@ openstack::network::neutron::private: "%{::network_br100}/14"
 
 ######## Fixed IPs (controllers)
 
-openstack::controller::address::api: "10.27.204.138"
-openstack::controller::address::management: "10.27.204.138"
-openstack::storage::address::api: "10.27.204.138"
-openstack::storage::address::management: "10.27.204.138"
+openstack::controller::address::api: "10.27.204.144"
+openstack::controller::address::management: "10.27.204.144"
+openstack::storage::address::api: "10.27.204.144"
+openstack::storage::address::management: "10.27.204.144"
 
 ######## Database
 
@@ -46,6 +46,7 @@ openstack::tenants:
     "test2":
         description: "Test tenant"
 
+# demo is used in the deployment script
 openstack::users:
     "test":
         password: "abc123"

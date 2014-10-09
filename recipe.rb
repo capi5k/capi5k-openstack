@@ -14,6 +14,7 @@
 # end
 require 'netaddr'
 require 'hiera'
+require 'yaml'
 
 set :openstack_path, "."
 
@@ -23,6 +24,26 @@ load "#{openstack_path}/output.rb"
 
 set :proxy, "http_proxy=http://proxy:3128 https_proxy=http://proxy:3128"
 set :puppet_p, "#{proxy} puppet"
+
+
+# return the hash map credentials
+def rc(name)
+  config = YAML::load_file("#{openstack_path}/hiera/common.yaml")
+  user = config["openstack::users"][name]
+  if (user.nil?)
+    return {}
+  end
+
+  return {
+    "OS_USERNAME"            => name,
+    "OS_PASSWORD"            => user["password"],
+    "OS_TENANT_NAME"         => user["tenant"],
+    'OS_AUTH_URL'            => 'http://localhost:5000/v2.0/',
+    'OS_REGION_NAME'         => 'openstack',
+    'KEYSTONE_ENDPOINT_TYPE' => 'publicURL',
+    'NOVA_ENDPOINT_TYPE'     => 'publicURL'
+  }
+end
 
 
 namespace :openstack do
@@ -225,48 +246,89 @@ namespace :openstack do
     task :default do
       upload_keys
       configure
+      demo
+      ec2_boot
+      nova_boot
     end
 
     task :upload_keys, :roles => [:controller] do
       set :user, "root"
       upload "#{openstack_path}/keys/id_rsa.pub", ".ssh/id_rsa.pub", :via => :scp
       upload "#{openstack_path}/keys/id_rsa", ".ssh/id_rsa", :via => :scp
+      run "chmod 600 .ssh/id_rsa"
     end
 
-
     task :configure, :roles => [:controller] do
-      set :default_environment, {
-          'OS_USERNAME'            => 'admin',
-          'OS_PASSWORD'            => 'fyby-tet',
-          'OS_TENANT_NAME'         => 'admin',
-          'OS_AUTH_URL'            =>'http://localhost:5000/v2.0/',
-          'OS_REGION_NAME'         =>'openstack',
-          'KEYSTONE_ENDPOINT_TYPE' =>'publicURL',
-          'NOVA_ENDPOINT_TYPE'     =>'publicURL'
-      }
+      set :default_environment, rc('test')
       set :user, "root"
       controllerAddress = capture "facter ipaddress"
       # we choose a range of ips which doen't collide with any host of g5k 
       # see https://www.grid5000.fr/mediawiki/index.php/User:Lnussbaum/Network#KaVLAN
       # here 255 hosts only
       nova_net = controllerAddress.gsub(/(\d)+\.(\d)+$/, "230.0/24")
-      run "nova keypair-add --pub_key /root/.ssh/id_rsa.pub jdoe_key"
-      run "nova secgroup-create vm_jdoe_sec_group 'vm_jdoe_sec_group test security group'"
-      run "nova secgroup-add-rule vm_jdoe_sec_group tcp 22 22 0.0.0.0/0"
-      run "nova secgroup-add-rule vm_jdoe_sec_group tcp 80 80 0.0.0.0/0"
-      run "nova secgroup-add-rule vm_jdoe_sec_group icmp -1 -1 0.0.0.0/0"
-      run "nova secgroup-list-rules vm_jdoe_sec_group"
-      run "wget http://apt.grid5000.fr/cloud/ubuntu-12.04-server-cloudimg-amd64-disk1.img -O /tmp/ubuntu-12.04-server-cloudimg-amd64-disk1.img"
-      run "glance add name='ubuntu-image' is_public=true container_format=ovf disk_format=qcow2 < /tmp/ubuntu-12.04-server-cloudimg-amd64-disk1.img"
       run "nova network-create net-jdoe --bridge br100 --multi-host T --fixed-range-v4 #{nova_net}"
+      $images.each do |image|
+        run "wget #{image[:url]} -O #{image[:name]}"
+        run "glance add name='#{image[:short]}' is_public=true container_format=ovf disk_format=qcow2 < #{image[:name]}"
+      end
+      # disable quotas
+      run "nova quota-class-update --cores -1 default"
+      run "nova quota-class-update --instances -1 default"
+      run "nova quota-class-update --ram -1 default"
       # run some checks
       run "nova net-list"
-      run "nova secgroup-list"
       run "nova image-list"
+      run "nova-manage service list | sort"
+      puts "### Now creating EC2 credentials"
+      # acces and secret key
+      run "keystone ec2-credentials-create > admin.ec2"
+      run "cat admin.ec2"
     end
 
+    namespace :demo do
+
+      desc 'Bootstrap the demo user'
+      task :default do
+        demorc
+        ec2 
+      end
+
+      task :demorc, :roles => [:controller] do
+        set :user, "root"
+        rc = rc("demo")
+        run "echo \"\" > demorc" 
+        rc.each do |k,v| 
+          run "echo \"export #{k}=#{v}\" >> demorc"
+        end
+      end
+
+      task :ec2, :roles => [:controller] do
+        set :user, "root"
+        set :default_environment, rc('demo')
+        run "nova keypair-add --pub_key /root/.ssh/id_rsa.pub jdoe_key"
+        run "nova secgroup-create vm_jdoe_sec_group 'vm_jdoe_sec_group test security group'"
+        run "nova secgroup-add-rule vm_jdoe_sec_group tcp 22 22 0.0.0.0/0"
+        run "nova secgroup-add-rule vm_jdoe_sec_group tcp 80 80 0.0.0.0/0"
+        run "nova secgroup-add-rule vm_jdoe_sec_group icmp -1 -1 0.0.0.0/0"
+        run "nova secgroup-list-rules vm_jdoe_sec_group"
+        run "keystone ec2-credentials-create > demo.ec2"
+        run "nova secgroup-list"
+        run "cat demo.ec2"
+      end
+
+
+    end
+
+    task :ec2_boot, :roles => [:controller] do
+      set :user, "root"
+      run "cat admin.ec2"
+      puts "You can run instances using ec2 : "
+      puts "EC2_ACCCESS_KEY=abc EC2_SECRET_KEY=abc EC2_URL=abc euca-run-instances -n 1 -g vm_jdoe_sec_group -k jdoe_key -t m1.medium ubuntu-image"
+    end
+
+
     desc 'reminder about booting a VMs'
-    task :boot do
+    task :nova_boot do
       puts "You are now ready to boot a VM : (change the net-id) "
       puts "nova boot --flavor 3 --security_groups vm_jdoe_sec_group --image ubuntu-image --nic net-id=a665bfd4-53da-41a8-9bd6-bab03c09b890 --key_name jdoe_key  ubuntu-vm"
     end
