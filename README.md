@@ -54,17 +54,29 @@ nova-scheduler   parapluie-32-kavlan-16.rennes.grid5000.fr internal         enab
 
 # Boot a vm
 
+## Using nova
+
 ```
+# use demo user
+(controller) source demorc
 (controller) nova boot --flavor 3 --security_groups vm_jdoe_sec_group --image ubuntu-image --nic net-id=a665bfd4-53da-41a8-9bd6-bab03c09b890 --key_name jdoe_key  ubuntu-vm
 ```
 
 Note : Get the list of nets / images  ...
 ```
-nova net-list 
+nova net-list
 nova image-list
 nova secgroup-list
 nova keypair-list
 ````
+
+## Using the EC2 interface
+
+```
+# check access/secret key
+(controller) cat demo.ec2
+(controller) EC2_ACCESS_KEY=224de6d07e5342dea886f64384e8d27e EC2_SECRET_KEY=8d70469c8fba4b7194d1f0276d33b813 EC2_URL=http://10.27.204.144:8773/services/Cloud euca-run-instances -n 1 -g vm_jdoe_sec_group -k jdoe_key -t m1.medium ubuntu-13.10
+```
 
 # Using the web Gui
 
@@ -73,6 +85,4 @@ nova keypair-list
 ```
 And then visit ```http://127.0.0.1:8000/horizon```
 
-Note : some user are created by the deployment script. See https://github.com/capi5k/capi5k-openstack/blob/master/hiera/common.yaml 
-
-
+Note : some user are created by the deployment script. See https://github.com/capi5k/capi5k-openstack/blob/master/hiera/common.yaml
