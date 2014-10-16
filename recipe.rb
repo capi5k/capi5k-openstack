@@ -237,6 +237,11 @@ namespace :openstack do
       task :network_apply, :roles => [:compute] do
         set :user, "root"
         run "puppet agent -t"
+        # make sure everything is restarted
+        run "service nova-compute restart"
+        run "service nova-network restart"
+        run "service nova-api-metadata restart"
+        run "service nova-cert restart"
       end
     end
   end
@@ -246,7 +251,7 @@ namespace :openstack do
     task :default do
       upload_keys
       configure
-      demo
+      demo::default
       ec2_boot
       nova_boot
     end
