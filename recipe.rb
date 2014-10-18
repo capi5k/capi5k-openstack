@@ -312,8 +312,7 @@ namespace :openstack do
         set :default_environment, rc('demo')
         run "nova keypair-add --pub_key /root/.ssh/id_rsa.pub jdoe_key"
         run "nova secgroup-create vm_jdoe_sec_group 'vm_jdoe_sec_group test security group'"
-        run "nova secgroup-add-rule vm_jdoe_sec_group tcp 22 22 0.0.0.0/0"
-        run "nova secgroup-add-rule vm_jdoe_sec_group tcp 80 80 0.0.0.0/0"
+        run "nova secgroup-add-rule vm_jdoe_sec_group tcp -1 -1 0.0.0.0/0"
         run "nova secgroup-add-rule vm_jdoe_sec_group icmp -1 -1 0.0.0.0/0"
         run "nova secgroup-list-rules vm_jdoe_sec_group"
         run "keystone ec2-credentials-create > demo.ec2"
