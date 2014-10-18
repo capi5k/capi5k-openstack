@@ -74,7 +74,7 @@ namespace :openstack do
     #  upload "#{openstack_path}/templates/puppet.conf", "/etc/puppet/puppet.conf", :via => :scp
     end
 
-    task :prepare, :roles => [:puppet_master] do
+    task :prepare, :roles => [:puppet_master], :on_error => :continue do
       set :user, "root"
       run "#{puppet_p} module install puppetlabs-openstack"
       upload "#{openstack_path}/openstackg5k", "/etc/puppet/modules", :via => :scp, :recursive => :true
