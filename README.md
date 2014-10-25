@@ -88,3 +88,7 @@ nova keypair-list
 And then visit ```http://127.0.0.1:8000/horizon```
 
 Note : some user are created by the deployment script. See https://github.com/capi5k/capi5k-openstack/blob/master/hiera/common.yaml
+
+## Notes on G5k specific deployment 
+
+Some classes are overriden to fit into G5K  (see openstackg5k module)
