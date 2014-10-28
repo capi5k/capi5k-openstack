@@ -18,10 +18,10 @@ openstack::network::neutron::private: "%{::network_br100}/14"
 
 ######## Fixed IPs (controllers)
 
-openstack::controller::address::api: "10.27.204.144"
-openstack::controller::address::management: "10.27.204.144"
-openstack::storage::address::api: "10.27.204.144"
-openstack::storage::address::management: "10.27.204.144"
+openstack::controller::address::api: "10.27.204.148"
+openstack::controller::address::management: "10.27.204.148"
+openstack::storage::address::api: "10.27.204.148"
+openstack::storage::address::management: "10.27.204.148"
 
 ######## Database
 
@@ -33,6 +33,7 @@ openstack::mysql::allowed_hosts: ['localhost', '127.0.0.1', "10.27.%.%" ]
 
 openstack::rabbitmq::user: 'openstack'
 openstack::rabbitmq::password: 'pose-vix'
+openstack::rabbitmq::virtual_host: 'openstack'
 
 ######## Keystone
 
@@ -40,14 +41,13 @@ openstack::keystone::admin_token: 'sosp-kyl'
 openstack::keystone::admin_email: 'chris.hoge@puppetlabs.com'
 openstack::keystone::admin_password: 'fyby-tet'
 
-openstack::tenants:
+openstack::keystone::tenants:
     "test":
         description: "Test tenant"
     "test2":
         description: "Test tenant"
 
-# demo is used in the deployment script
-openstack::users:
+openstack::keystone::users:
     "test":
         password: "abc123"
         tenant: "test"

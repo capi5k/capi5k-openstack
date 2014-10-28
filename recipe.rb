@@ -29,7 +29,7 @@ set :puppet_p, "#{proxy} puppet"
 # return the hash map credentials
 def rc(name)
   config = YAML::load_file("#{openstack_path}/hiera/common.yaml")
-  user = config["openstack::users"][name]
+  user = config["openstack::keystone::users"][name]
   if (user.nil?)
     return {}
   end
@@ -63,7 +63,7 @@ namespace :openstack do
     task :default do
       proxy 
       prepare
-      #patchs
+      patchs
     end
 
     # Put it in puppet recipe
@@ -74,19 +74,17 @@ namespace :openstack do
     #  upload "#{openstack_path}/templates/puppet.conf", "/etc/puppet/puppet.conf", :via => :scp
     end
 
-    task :prepare, :roles => [:puppet_master] do
+    task :prepare, :roles => [:puppet_master], :on_error => :continue  do
       set :user, "root"
-      run "#{puppet_p} module install puppetlabs-openstack"
+      run "#{puppet_p} module install puppetlabs-openstack -v 4.2.0"
       upload "#{openstack_path}/openstackg5k", "/etc/puppet/modules", :via => :scp, :recursive => :true
     end 
 
-=begin 
+    desc 'Apply patches'
     task :patchs, :roles => [:puppet_master] do
       set :user, "root"
-      upload "#{openstack_path}/patchs/params.pp", "/etc/puppet/modules/neutron/manifests/params.pp"
-      upload "#{openstack_path}/patchs/ovs.pp", "/etc/puppet/modules/neutron/manifests/plugins/ovs.pp"
+      upload "#{openstack_path}/patchs/modules", "/etc/puppet/", :via => :scp, :recursive => :true
     end
-=end
   end
 
   namespace :hiera do
@@ -216,7 +214,7 @@ namespace :openstack do
     end
 
     desc 'Provision the other nodes'
-    task :others, :roles => [:storage, :compute] do
+    task :others, :roles => [:compute], :max_hosts => 20, :on_error => :continue do
       set :user, "root"
       run "puppet agent -t"
     end
@@ -228,6 +226,7 @@ namespace :openstack do
         network_apply
       end
 
+      desc 'Path compute site.pp with legacy network recipe'
       task :network_manifest, :roles => [:puppet_master] do
         set :user, "root"
         run "cp /etc/puppet/manifests/site.pp /etc/puppet/manifests/site.pp.old"
@@ -237,12 +236,17 @@ namespace :openstack do
       task :network_apply, :roles => [:compute] do
         set :user, "root"
         run "puppet agent -t"
-        # make sure everything is restarted
+      end
+
+      desc "Restart compute services (network/compute/cert/api-metadat)"
+      task :restart_services, :roles => [:compute], :on_error => :continue do
+        set :user, "root"
         run "service nova-compute restart"
         run "service nova-network restart"
         run "service nova-api-metadata restart"
         run "service nova-cert restart"
       end
+
     end
   end
 
@@ -263,7 +267,7 @@ namespace :openstack do
       run "chmod 600 .ssh/id_rsa"
     end
 
-    task :configure, :roles => [:controller] do
+    task :configure, :roles => [:controller], :on_error => :continue do
       set :default_environment, rc('test')
       set :user, "root"
       controllerAddress = capture "facter ipaddress"
@@ -312,8 +316,8 @@ namespace :openstack do
         set :default_environment, rc('demo')
         run "nova keypair-add --pub_key /root/.ssh/id_rsa.pub jdoe_key"
         run "nova secgroup-create vm_jdoe_sec_group 'vm_jdoe_sec_group test security group'"
-        run "nova secgroup-add-rule vm_jdoe_sec_group tcp 22 22 0.0.0.0/0"
-        run "nova secgroup-add-rule vm_jdoe_sec_group tcp 80 80 0.0.0.0/0"
+        run "nova secgroup-add-rule vm_jdoe_sec_group tcp 1 65535 0.0.0.0/0"
+        run "nova secgroup-add-rule vm_jdoe_sec_group udp 1 65535 0.0.0.0/0"
         run "nova secgroup-add-rule vm_jdoe_sec_group icmp -1 -1 0.0.0.0/0"
         run "nova secgroup-list-rules vm_jdoe_sec_group"
         run "keystone ec2-credentials-create > demo.ec2"

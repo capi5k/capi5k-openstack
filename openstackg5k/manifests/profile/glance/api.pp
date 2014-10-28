@@ -53,5 +53,6 @@ class openstackg5k::profile::glance::api {
     rabbit_password => hiera('openstack::rabbitmq::password'),
     rabbit_userid   => hiera('openstack::rabbitmq::user'),
     rabbit_host     => hiera('openstack::controller::address::management'),
+    rabbit_virtual_host=> hiera('openstack::rabbitmq::virtual_host'),
   }
 }

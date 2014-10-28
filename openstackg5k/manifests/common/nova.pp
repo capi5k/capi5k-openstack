@@ -19,6 +19,7 @@ class openstackg5k::common::nova ($is_compute    = false) {
     rabbit_hosts       => [$controller_management_address],
     rabbit_userid      => hiera('openstack::rabbitmq::user'),
     rabbit_password    => hiera('openstack::rabbitmq::password'),
+    rabbit_virtual_host=> hiera('openstack::rabbitmq::virtual_host'),
     debug              => hiera('openstack::debug'),
     verbose            => hiera('openstack::verbose'),
     mysql_module       => '2.2',
