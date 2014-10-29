@@ -9,9 +9,9 @@ class openstackg5k::profile::nova::storage {
     mode   => 777 
   }
 
-  mount { '/tmp/instances':
+  mount { '/var/lib/nova/instances':
     ensure  => mounted,
-    device  => '/var/lib/nova/instances',
+    device  => '/tmp/instances',
     fstype  => 'none',
     options => 'rw,bind',
     require => File['/tmp/instances']

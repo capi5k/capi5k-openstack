@@ -1,6 +1,6 @@
 class openstackg5k::role::controller inherits ::openstack::role {
   class { '::openstack::profile::firewall': }
-  class { '::openstack::profile::rabbitmq': } ->
+  class { '::openstackg5k::profile::rabbitmq': } ->
   class { '::openstack::profile::memcache': } ->
   class { '::openstack::profile::mysql': } ->
   class { '::openstack::profile::mongodb': } ->

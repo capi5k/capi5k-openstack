@@ -6,9 +6,9 @@ openstack::network::external: "%{::network_br100}/18"
 openstack::network::management: "%{::network_br100}/18"
 openstack::network::data: "%{::network_br100}/18"
 
-openstack::network::external::ippool::start: 10.27.216.0
-openstack::network::external::ippool::end: 10.27.217.255
-openstack::network::external::gateway: 10.27.255.254
+openstack::network::external::ippool::start: 10.19.216.0
+openstack::network::external::ippool::end: 10.19.217.255
+openstack::network::external::gateway: 10.19.255.254
 openstack::network::external::dns: 131.254.203.235
 
 
@@ -18,21 +18,29 @@ openstack::network::neutron::private: "%{::network_br100}/14"
 
 ######## Fixed IPs (controllers)
 
-openstack::controller::address::api: "10.27.204.144"
-openstack::controller::address::management: "10.27.204.144"
-openstack::storage::address::api: "10.27.204.144"
-openstack::storage::address::management: "10.27.204.144"
+<<<<<<< Updated upstream
+openstack::controller::address::api: "10.27.204.148"
+openstack::controller::address::management: "10.27.204.148"
+openstack::storage::address::api: "10.27.204.148"
+openstack::storage::address::management: "10.27.204.148"
+=======
+openstack::controller::address::api: "10.19.200.166"
+openstack::controller::address::management: "10.19.200.166"
+openstack::storage::address::api: "10.19.200.166"
+openstack::storage::address::management: "10.19.200.166"
+>>>>>>> Stashed changes
 
 ######## Database
 
 openstack::mysql::root_password: 'spam-gak'
 openstack::mysql::service_password: 'fuva-wax'
-openstack::mysql::allowed_hosts: ['localhost', '127.0.0.1', "10.27.%.%" ]
+openstack::mysql::allowed_hosts: ['localhost', '127.0.0.1', "10.19.%.%" ]
 
 ######## RabbitMQ
 
 openstack::rabbitmq::user: 'openstack'
 openstack::rabbitmq::password: 'pose-vix'
+openstack::rabbitmq::virtual_host: 'openstack'
 
 ######## Keystone
 
@@ -40,14 +48,17 @@ openstack::keystone::admin_token: 'sosp-kyl'
 openstack::keystone::admin_email: 'chris.hoge@puppetlabs.com'
 openstack::keystone::admin_password: 'fyby-tet'
 
-openstack::tenants:
+openstack::keystone::tenants:
     "test":
         description: "Test tenant"
     "test2":
         description: "Test tenant"
 
-# demo is used in the deployment script
+<<<<<<< Updated upstream
+openstack::keystone::users:
+=======
 openstack::users:
+>>>>>>> Stashed changes
     "test":
         password: "abc123"
         tenant: "test"
