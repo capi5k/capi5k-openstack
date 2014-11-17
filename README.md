@@ -1,12 +1,73 @@
 capi5k-openstack
 =================
 
-Prerequisites : see http://capi5k.github.io/capi5k/
+
+### What kind of deployment is it ?
+
+* Base image : ubuntu1204
+* Openstack Icehouse
+* Legacy network configured to be high available (one nova-network / compute node)
+* Nodes are put in a VLAN (global only, support for local routed VLAN in progress)
+
+Boostrap with the following:
+
+* One base image (can be adapted easily in the ```Capfile```)
+```
+nova image-list
++--------------------------------------+--------------+--------+--------+
+| ID                                   | Name         | Status | Server |
++--------------------------------------+--------------+--------+--------+
+| ec350d7b-e075-4725-baa0-42fc547a277b | ubuntu-13.10 | ACTIVE |        |
++--------------------------------------+--------------+--------+--------+
+```
+* One network used for the VMs IPs (automatically generated from the vlan network)
+```
+nova net-list
++--------------------------------------+----------+----------------+
+| ID                                   | Label    | CIDR           |
++--------------------------------------+----------+----------------+
+| 8462e71b-81ce-4d0f-8bfd-10f8bb73b29c | net-jdoe | 10.27.230.0/24 |
++--------------------------------------+----------+----------------+
+```
+* 2 specific users (see ```common.yml.erb```)
+  * demo is in the demo tenant
+  * test has admin permissions.
+
+```
+keystone user-list
++----------------------------------+------------+---------+---------------------------+
+|                id                |    name    | enabled |           email           |
++----------------------------------+------------+---------+---------------------------+
+| 59fc0746333b47eab928bc05dcc5b576 |    demo    |   True  |      demo@example.com     |
+| ac5d82e9217c42e3af2e51466ecbf2c7 |    test    |   True  |      test@example.com     |
+...
++----------------------------------+------------+---------+---------------------------+
+```
+* Some files generated on the controller
+
+```
+$ ls -l
+total 242380
+-rw-r--r-- 1 root root       441 Nov 17 17:02 admin.ec2 # user test EC2 credentials
+-rw-r--r-- 1 root root       441 Nov 17 17:02 demo.ec2  # user demo EC2 credentials
+-rw-r--r-- 1 root root       233 Nov 17 17:02 demorc    # user demo internal API exports
+-rwx------ 1 root root       446 Nov 17 16:29 openrc    # user admin internal API exports
+...
+```
+
+### Prerequisites : see http://capi5k.github.io/capi5k/
 
 * ``` xpm install ```
 * ``` bundle install ```
-* ```cap automatic ; cap puppetcluster; cap puppetcluster; cap openstack; cap openstack:run_agents:network```
-* ```cap openstack:bootstrap``` (generate keypair/net/sec-group)
+
+Submit / Deploy linux base image, bootstrap a puppet cluster on the nodes.
+* ```cap automatic puppetcluster; cap puppetcluster``` (yes, twice puppetcluster ... see below)
+
+Deploy openstack.
+*  ```cap openstack```
+
+Run some initializations
+*  ```cap openstack:boostrap```
 
 
 ## check the deployment
@@ -87,8 +148,6 @@ nova keypair-list
 ```
 And then visit ```http://127.0.0.1:8000/horizon```
 
-Note : some user are created by the deployment script. See https://github.com/capi5k/capi5k-openstack/blob/master/hiera/common.yaml
-
-## Notes on G5k specific deployment 
+## Notes on G5k specific deployment
 
 Some classes are overriden to fit into G5K  (see openstackg5k module)
