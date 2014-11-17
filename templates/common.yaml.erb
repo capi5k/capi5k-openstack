@@ -81,7 +81,12 @@ openstack::swift::hash_suffix: 'pop-bang'
 ######## Nova
 
 openstack::nova::libvirt_type: 'kvm'
+openstack::nova::libvirt_cpu_mode: 'host-model'
 openstack::nova::password: 'quuk-paj'
+# legacy network parameters
+openstack::nova::flat_network_bridge: 'br100'
+openstack::nova::flat_interface: 'eth0'
+openstack::nova::public_interface: 'eth1'
 
 ######## Neutron
 

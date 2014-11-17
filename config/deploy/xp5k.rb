@@ -4,10 +4,10 @@ require 'xp5k'
 require 'erb'
 
 # G5K global parameters
-set :site, ENV['site'] || "nancy"
-set :walltime, ENV['walltime'] || "04:00:00"
+set :site, ENV['site'] || "rennes"
+set :walltime, ENV['walltime'] || "3:00:00"
 set :subnet, ENV['subnet'] || "slash_18"
-set :vlan, ENV['vlan'] || "14"
+set :vlan, ENV['vlan'] || "16"
 
 
 XP5K::Config.load
@@ -15,14 +15,14 @@ XP5K::Config.load
 $myxp = XP5K::XP.new(:logger => logger)
 
 $myxp.define_job({
-  :resources  => ["{type='kavlan-global'}/vlan=1, nodes=30, walltime=#{walltime}"],
+  :resources  => ["{type='kavlan-global'}/vlan=1, nodes=5, walltime=#{walltime}"],
   :site       => "#{site}",
   :retry      => true,
   :goal       => "100%",
   :types      => ["deploy"],
   :name       => "openstack" , 
   :roles      =>  [
-    XP5K::Role.new({ :name => 'capi5k-init', :size => 30 }),
+    XP5K::Role.new({ :name => 'capi5k-init', :size => 5 }),
   ],
 
   :command    => "sleep 206400"

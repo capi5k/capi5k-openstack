@@ -1,17 +1,3 @@
-# change accordingly to your project
-#
-#
-#
-#
-#set :hadoop_path, "#{recipes_path}/hadoop"
-
-#load "#{hadoop_path}/roles.rb"
-#load "#{hadoop_path}/roles_definition.rb"
-#load "#{hadoop_path}/output.rb"
-
-# namespace :myproject do
-# # your recipe here
-# end
 require 'netaddr'
 require 'hiera'
 require 'yaml'
@@ -216,7 +202,7 @@ namespace :openstack do
     desc 'Provision the other nodes'
     task :others, :roles => [:compute], :max_hosts => 20, :on_error => :continue do
       set :user, "root"
-      run "puppet agent -t"
+      run "sleep $(( RANDOM%120 + 1 )) && puppet agent -t"
     end
   
     namespace :network do
@@ -235,7 +221,7 @@ namespace :openstack do
 
       task :network_apply, :roles => [:compute] do
         set :user, "root"
-        run "puppet agent -t"
+        run "sleep $(( RANDOM%120 + 1 )) && puppet agent -t"
       end
 
       desc "Restart compute services (network/compute/cert/api-metadat)"
@@ -246,7 +232,6 @@ namespace :openstack do
         run "service nova-api-metadata restart"
         run "service nova-cert restart"
       end
-
     end
   end
 
@@ -254,7 +239,10 @@ namespace :openstack do
     desc 'Bootstrap the environment (add image/sec-group/network)' 
     task :default do
       upload_keys
-      configure
+      images
+      network
+      admin_ec2
+      quotas
       demo::default
       ec2_boot
       nova_boot
@@ -267,7 +255,17 @@ namespace :openstack do
       run "chmod 600 .ssh/id_rsa"
     end
 
-    task :configure, :roles => [:controller], :on_error => :continue do
+    task :images, :roles => [:controller] do
+      set :default_environment, rc('test')
+      set :user, "root"
+       $images.each do |image|
+        run "wget #{image[:url]} -O #{image[:name]}"
+        run "glance add name='#{image[:short]}' is_public=true container_format=ovf disk_format=qcow2 < #{image[:name]}"
+        run "nova image-list"
+      end
+    end
+
+    task :network, :roles => [:controller] do
       set :default_environment, rc('test')
       set :user, "root"
       controllerAddress = capture "facter ipaddress"
@@ -276,22 +274,27 @@ namespace :openstack do
       # here 255 hosts only
       nova_net = controllerAddress.gsub(/(\d)+\.(\d)+$/, "230.0/24")
       run "nova network-create net-jdoe --bridge br100 --multi-host T --fixed-range-v4 #{nova_net}"
-      $images.each do |image|
-        run "wget #{image[:url]} -O #{image[:name]}"
-        run "glance add name='#{image[:short]}' is_public=true container_format=ovf disk_format=qcow2 < #{image[:name]}"
-      end
+      run "nova net-list"
+    end
+
+    task :admin_ec2, :roles => [:controller] do
+      set :default_environment, rc('test')
+      set :user, "root"
+      # acces and secret key
+      run "keystone ec2-credentials-create > admin.ec2"
+      run "cat admin.ec2"
+    end
+
+    task :quotas, :roles => [:controller], :on_error => :continue do
+      set :default_environment, rc('test')
+      set :user, "root"
       # disable quotas
       run "nova quota-class-update --cores -1 default"
       run "nova quota-class-update --instances -1 default"
       run "nova quota-class-update --ram -1 default"
       # run some checks
-      run "nova net-list"
-      run "nova image-list"
       run "nova-manage service list | sort"
       puts "### Now creating EC2 credentials"
-      # acces and secret key
-      run "keystone ec2-credentials-create > admin.ec2"
-      run "cat admin.ec2"
     end
 
     namespace :demo do
@@ -343,6 +346,4 @@ namespace :openstack do
     end
 
   end
-
 end
-

@@ -10,6 +10,7 @@ class openstackg5k::profile::nova::compute {
 	#for migration:
   class { '::nova::compute::libvirt':
     libvirt_type     => hiera('openstack::nova::libvirt_type'),
+    libvirt_cpu_mode => hiera('openstack::nova::libvirt_cpu_mode'),
     vncserver_listen => '0.0.0.0',
   }
 

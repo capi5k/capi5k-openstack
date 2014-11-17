@@ -16,9 +16,9 @@ class openstackg5k::profile::nova::nova-legacy-net-compute {
         'DEFAULT/send_arp_for_ha': value => 'True';
         'DEFAULT/share_dhcp_address': value => 'True';
         'DEFAULT/force_dhcp_release': value => 'True';
-        'DEFAULT/flat_network_bridge': value => 'br100';
-        'DEFAULT/flat_interface': value => 'eth0';
-        'DEFAULT/public_interface': value => 'eth0';
+        'DEFAULT/flat_network_bridge': value => hiera('openstack::nova::flat_network_bridge');
+        'DEFAULT/flat_interface': value => hiera('openstack::nova::flat_interface');
+        'DEFAULT/public_interface': value => hiera('openstack::nova::public_interface');
   	}
 
 

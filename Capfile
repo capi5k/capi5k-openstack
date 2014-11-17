@@ -16,13 +16,8 @@ after "automatic", "xp5k"
 
 # the following images will be uploaded during cap openstack:bootstrap
 $images = []
-#$images << { 
-#  :name => "ubuntu-13.10-server-clouding-amd64-disk1.img",
-#  :short => "ubuntu-13.10"
-#}
 $images << { 
-  :url => "http://public.nancy.grid5000.fr/~msimonin/ubuntu-13.10-server-clouding-amd64-disk1-dmtcp-mpi-jtimings.img",
-  :name => "ubuntu-13.10-server-clouding-amd64-disk1-dmtcp-mpi.img",
-  :short => "ubuntu-13.10-dmtcp-mpi-jtimings"
+  :name  => "ubuntu-13.10-server-clouding-amd64-disk1.img",
+  :url   => "http://public.rennes.grid5000.fr/~msimonin/ubuntu-13.10-server-clouding-amd64-disk1.img", 
+  :short => "ubuntu-13.10"
 }
-

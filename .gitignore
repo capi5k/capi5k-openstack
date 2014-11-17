@@ -3,4 +3,5 @@ node_modules
 bower_components
 xpm_modules
 tmp/*
+hiera/
 
