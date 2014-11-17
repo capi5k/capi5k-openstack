@@ -63,6 +63,9 @@ total 242380
 Submit / Deploy linux base image, bootstrap a puppet cluster on the nodes.
 * ```cap automatic puppetcluster; cap puppetcluster``` (yes, twice puppetcluster ... see below)
 
+Note : for deployment at scale, one can use ```cap puppetcluster:passenger``` in addition to provide
+passenger support to the puppet master.
+
 Deploy openstack.
 *  ```cap openstack```
 
