@@ -4,10 +4,10 @@ require 'xp5k'
 require 'erb'
 
 # G5K global parameters
-set :site, ENV['site'] || "rennes"
+set :site, ENV['site'] || "lyon"
 set :walltime, ENV['walltime'] || "3:00:00"
 set :subnet, ENV['subnet'] || "slash_18"
-set :vlan, ENV['vlan'] || "16"
+set :vlan, ENV['vlan'] || "13"
 
 
 XP5K::Config.load
@@ -15,7 +15,7 @@ XP5K::Config.load
 $myxp = XP5K::XP.new(:logger => logger)
 
 $myxp.define_job({
-  :resources  => ["{type='kavlan-global'}/vlan=1, nodes=5, walltime=#{walltime}"],
+  :resources  => ["{type='kavlan-global'}/vlan=1, {virtual!='none'}/nodes=5, walltime=#{walltime}"],
   :site       => "#{site}",
   :retry      => true,
   :goal       => "100%",

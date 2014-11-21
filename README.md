@@ -28,7 +28,7 @@ This script has been successfully tested in :
 * Lyon site
 * Nancy site
 
-Boostrap with the following:
+Openstack is boostraped with the following:
 
 * One base image (can be adapted easily in the ```Capfile```)
 ```
