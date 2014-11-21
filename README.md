@@ -1,6 +1,20 @@
 capi5k-openstack
 =================
 
+### Summary
+
+  * Overview
+    * What kind of deployment is it ?
+    * Prerequisites : see http://capi5k.github.io/capi5k/
+  * Deploy
+    * Check the deployment
+  * Boot VMs
+    * Using Nova
+    * Using EC2
+    * Using the web interface
+  * Customize the deployment
+
+## Overview
 
 ### What kind of deployment is it ?
 
@@ -56,6 +70,8 @@ total 242380
 ```
 
 ### Prerequisites : see http://capi5k.github.io/capi5k/
+
+## Deploy
 
 * ``` xpm install ```
 * ``` bundle install ```
@@ -118,9 +134,9 @@ nova-network     parapluie-8-kavlan-16.rennes.grid5000.fr internal         enabl
 nova-scheduler   parapluie-32-kavlan-16.rennes.grid5000.fr internal         enabled    :-)   2014-10-07 14:49:24
 ```
 
-# Boot a vm
+## Boot VMs
 
-## Using nova
+### Using nova
 
 ```
 # use demo user
@@ -136,7 +152,9 @@ nova secgroup-list
 nova keypair-list
 ````
 
-## Using the EC2 interface
+
+### Using the EC2 interface
+
 
 ```
 # check access/secret key
@@ -144,13 +162,16 @@ nova keypair-list
 (controller) EC2_ACCESS_KEY=224de6d07e5342dea886f64384e8d27e EC2_SECRET_KEY=8d70469c8fba4b7194d1f0276d33b813 EC2_URL=http://10.27.204.144:8773/services/Cloud euca-run-instances -n 1 -g vm_jdoe_sec_group -k jdoe_key -t m1.medium ubuntu-13.10
 ```
 
-# Using the web Gui
+### Using the web Gui
 
 ```
 (laptop) ssh -NL 8000:parapluie-32-kavlan-16.rennes.grid5000.fr:80 access.grid5000.fr
 ```
 And then visit ```http://127.0.0.1:8000/horizon```
 
-## Notes on G5k specific deployment
+## Customize the deployment
 
-Some classes are overriden to fit into G5K  (see openstackg5k module)
+ * You'll find some tuning possibilities in templates/common.yml.erb
+ The hiera store is generated using this file.
+
+ * Some classes are overriden to fit into G5K  (see openstackg5k module)
