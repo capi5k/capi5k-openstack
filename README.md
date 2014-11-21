@@ -23,6 +23,11 @@ capi5k-openstack
 * Legacy network configured to be high available (one nova-network / compute node)
 * Nodes are put in a VLAN (global only, support for local routed VLAN in progress)
 
+This script has been successfully tested in :
+* Rennes site
+* Lyon site
+* Nancy site
+
 Boostrap with the following:
 
 * One base image (can be adapted easily in the ```Capfile```)
@@ -170,6 +175,9 @@ nova keypair-list
 And then visit ```http://127.0.0.1:8000/horizon```
 
 ## Customize the deployment
+
+ * Change the config/xp5k/xp5k.rb file to fit your need.
+ The VLAN must be set manually (even if it's now possible to automate using the API)
 
  * You'll find some tuning possibilities in templates/common.yml.erb
  The hiera store is generated using this file.
