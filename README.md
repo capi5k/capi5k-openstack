@@ -28,7 +28,7 @@ This script has been successfully tested in :
 * Lyon site
 * Nancy site
 
-Openstack is boostraped with the following:
+Openstack is bootstraped with the following:
 
 * One base image (can be adapted easily in the ```Capfile```)
 ```
@@ -91,7 +91,7 @@ Deploy openstack.
 *  ```cap openstack```
 
 Run some initializations
-*  ```cap openstack:boostrap```
+*  ```cap openstack:bootstrap```
 
 
 ## check the deployment
