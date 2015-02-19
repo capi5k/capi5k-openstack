@@ -5,4 +5,5 @@ gem "shell-spinner"
 gem "xp5k"
 gem "netaddr"
 gem "hiera"
+gem "xpm"
 
