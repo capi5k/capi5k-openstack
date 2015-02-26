@@ -249,10 +249,9 @@ namespace :openstack do
     end
 
     task :upload_keys, :roles => [:controller] do
-      set :user, "root"
-      upload "#{openstack_path}/keys/id_rsa.pub", ".ssh/id_rsa.pub", :via => :scp
-      upload "#{openstack_path}/keys/id_rsa", ".ssh/id_rsa", :via => :scp
-      run "chmod 600 .ssh/id_rsa"
+      set :user, "root"a
+      run 'ssh-keygen -f /root/.ssh/id_rsa -N ""'
+      run "chmod 600 -R /root/.ssh"
     end
 
     task :images, :roles => [:controller] do
