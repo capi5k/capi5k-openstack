@@ -249,7 +249,7 @@ namespace :openstack do
     end
 
     task :upload_keys, :roles => [:controller] do
-      set :user, "root"a
+      set :user, "root"
       run 'ssh-keygen -f /root/.ssh/id_rsa -N ""'
       run "chmod 600 -R /root/.ssh"
     end
