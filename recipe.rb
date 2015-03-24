@@ -86,7 +86,7 @@ namespace :openstack do
       set :user, "#{g5k_user}"
 
       # get routed local vlan number using the jobname variable
-      vlan = $myxp.job_with_name("#{jobname}")['resources_by_type']['vlans'].first.to_i
+      vlan = $myxp.job_with_name("#{XP5K::Config[:jobname]}")['resources_by_type']['vlans'].first.to_i
 
       # build IP address a.b.c.d
       
@@ -291,7 +291,7 @@ namespace :openstack do
       controllerAddress = capture "facter ipaddress"
 
       # get routed local vlan number using the jobname variable
-      vlan = $myxp.job_with_name("#{jobname}")['resources_by_type']['vlans'].first.to_i
+      vlan = $myxp.job_with_name("#{XP5K::Config[:jobname]}")['resources_by_type']['vlans'].first.to_i
       vlan_config = YAML::load_file("#{openstack_path}/vlan-config.yaml")
       # we choose a range of ips which doen't collide with any host of g5k 
       # see https://www.grid5000.fr/mediawiki/index.php/User:Lnussbaum/Network#KaVLAN
