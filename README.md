@@ -76,6 +76,18 @@ total 242380
 
 ### Prerequisites : see http://capi5k.github.io/capi5k/
 
+## Prepare the deployment
+
+Create the file `xp.conf` into the `capi5k-openstack` directory with this content:
+
+    jobname         'the-name'
+    site            'the-site'
+    walltime        '2:00:00'
+    nodes           5
+
+Change the values according to what you want to deploy. 
+Be careful to not put a number of nodes less than 5. 
+
 ## Deploy
 
 * ``` xpm install ```
