@@ -84,13 +84,34 @@ namespace :openstack do
 
     task :subnet, :roles => [:frontend] do
       set :user, "#{g5k_user}"
-      puts "#{vlan}"
-      b=("#{vlan}".to_i-10)*4+3
-      puts b
-      @virtualMachineSubnets = (216..255).step(2).to_a.map{|x| "10."+b.to_s+"."+x.to_s+".1/23"} 
+
+      # get routed local vlan number using the jobname variable
+      vlan = $myxp.job_with_name("#{jobname}")['resources_by_type']['vlans'].first.to_i
+
+      # build IP address a.b.c.d
+      
+      vlan_config = YAML::load_file("#{openstack_path}/vlan-config.yaml")
+      a=vlan_config["a"].to_s + "."
+      b=vlan_config["b"]["#{site}"]
+      b=b+1 if vlan > 7 # see "c" part of IP addresses of KAVLAN-8 and KAVLAN-9
+      b=b.to_s
+      c=vlan_config["c"][vlan]
+      d="." + vlan_config["d"].to_s
+
+      @virtualMachineSubnets = (216..255).step(2).to_a.map{|x| a+b+"."+x.to_s+".1/23"} 
       puts @virtualMachineSubnets
+
       @subnet = @virtualMachineSubnets[0]
-      @gateway = "10."+b.to_s+".255.254"
+      # calculate gateway according to /18 subnet
+      # ex:
+      #   10.28.64.0/18 => -.-.01xx xxxx.254/18
+      #   
+      #   0011 1111 = 63
+      # + 0100 0000 = 64
+      # ----------------
+      #   0111 1111 = 127
+      c=(c+63).to_s
+      @gateway = "10."+b+"."+c+".254"
       @dns="131.254.203.235"
       cidr =  NetAddr::CIDR.create(@subnet)
       @ipstart = cidr.first
@@ -268,10 +289,16 @@ namespace :openstack do
       set :default_environment, rc('test')
       set :user, "root"
       controllerAddress = capture "facter ipaddress"
+
+      # get routed local vlan number using the jobname variable
+      vlan = $myxp.job_with_name("#{jobname}")['resources_by_type']['vlans'].first.to_i
+      vlan_config = YAML::load_file("#{openstack_path}/vlan-config.yaml")
       # we choose a range of ips which doen't collide with any host of g5k 
       # see https://www.grid5000.fr/mediawiki/index.php/User:Lnussbaum/Network#KaVLAN
       # here 255 hosts only
-      nova_net = controllerAddress.gsub(/(\d)+\.(\d)+$/, "230.0/24")
+      c=vlan_config["c"][vlan]
+      c=(c+30).to_s
+      nova_net = controllerAddress.gsub(/(\d)+\.(\d)+$/, c+".0/24")
       run "nova network-create net-jdoe --bridge br100 --multi-host T --fixed-range-v4 #{nova_net}"
       run "nova net-list"
     end
