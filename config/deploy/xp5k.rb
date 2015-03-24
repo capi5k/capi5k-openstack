@@ -3,24 +3,22 @@ require 'rubygems'
 require 'xp5k'
 require 'erb'
 
-# G5K global parameters
-set :site, ENV['site'] || "lyon"
-set :walltime, ENV['walltime'] || "3:00:00"
-set :subnet, ENV['subnet'] || "slash_18"
-set :jobname, ENV['jobname'] || "openstack"
-
-
 XP5K::Config.load
+
+XP5K::Config[:jobname]  ||= 'openstack'
+XP5K::Config[:site]     ||= 'lyon'
+XP5K::Config[:walltime] ||= '3:00:00'
+XP5K::Config[:nodes]    ||= 5
 
 $myxp = XP5K::XP.new(:logger => logger)
 
 $myxp.define_job({
-  :resources  => ["{type='kavlan'}/vlan=1, {virtual!='none'}/nodes=5, walltime=#{walltime}"],
-  :site       => "#{site}",
+  :resources  => ["{type='kavlan'}/vlan=1, {virtual!='none'}/nodes=#{XP5K::Config[:nodes]}, walltime=#{XP5K::Config[:walltime]}"],
+  :site       => "#{XP5K::Config[:site]}",
   :retry      => true,
   :goal       => "100%",
   :types      => ["deploy"],
-  :name       => "#{jobname}", 
+  :name       => "#{XP5K::Config[:jobname]}", 
   :roles      =>  [
     XP5K::Role.new({ :name => 'capi5k-init', :size => 5 }),
   ],
@@ -29,11 +27,11 @@ $myxp.define_job({
 })
 
 $myxp.define_deployment({
-  :site           => "#{site}",
+  :site           => "#{XP5K::Config[:site]}",
   :environment    => "ubuntu-x64-1204",
   :roles          => %w(capi5k-init),
   :key            => File.read("#{ssh_public}"), 
-  :vlan_from_job  => "#{jobname}",
+  :vlan_from_job  => "#{XP5K::Config[:jobname]}",
 })
 
 load "config/deploy/xp5k_common_tasks.rb"
