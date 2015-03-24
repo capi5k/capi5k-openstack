@@ -92,7 +92,7 @@ namespace :openstack do
       
       vlan_config = YAML::load_file("#{openstack_path}/vlan-config.yaml")
       a=vlan_config["a"].to_s + "."
-      b=vlan_config["b"]["#{site}"]
+      b=vlan_config["b"]["#{XP5K::Config[:site]}"]
       b=b+1 if vlan > 7 # see "c" part of IP addresses of KAVLAN-8 and KAVLAN-9
       b=b.to_s
       c=vlan_config["c"][vlan]
