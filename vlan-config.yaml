@@ -1,0 +1,33 @@
+##
+# Hash table to create IP addresses according to the routed local vlan used
+# the values are based on the table you can see on this page: 
+# https://www.grid5000.fr/mediawiki/index.php/Grid5000:Network#Routed_Local_Vlans
+#
+# IP: a.b.c.d
+---
+# "a" section
+a: 10
+# "b" section
+b:
+    bordeaux:   0
+    grenoble:   4
+    lille:      8
+    lyon:       12
+    nancy:      16
+    orsay:      20
+    rennes:     24
+    toulouse:   28
+    sophia:     32
+    reims:      36
+    luxembourg: 40
+    nantes:     44
+# "c" section
+c:
+    4: 0
+    5: 64
+    6: 128
+    7: 192
+    8: 0
+    9: 64
+# "d" section
+d: 0
