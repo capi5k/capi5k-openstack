@@ -84,17 +84,38 @@ namespace :openstack do
 
     task :subnet, :roles => [:frontend] do
       set :user, "#{g5k_user}"
-      puts "#{vlan}"
-      b=("#{vlan}".to_i-10)*4+3
-      puts b
-      @virtualMachineSubnets = (216..255).step(2).to_a.map{|x| "10."+b.to_s+"."+x.to_s+".1/23"} 
-      puts @virtualMachineSubnets
-      @subnet = @virtualMachineSubnets[0]
-      @gateway = "10."+b.to_s+".255.254"
-      @dns="131.254.203.235"
-      cidr =  NetAddr::CIDR.create(@subnet)
-      @ipstart = cidr.first
-      @ipend = cidr.last
+
+      # get vlan number using the jobname variable
+      vlan = $myxp.job_with_name("#{jobname}")['resources_by_type']['vlans'].first.to_i
+
+      case vlan
+      when 1 .. 3
+        puts "Non-routed local vlans not supported"
+      when 4 .. 21
+        vlan_config = YAML::load_file("#{openstack_path}/vlan-config.yaml")
+        ip=vlan_config["#{site}"][vlan]
+        cidr =  NetAddr::CIDR.create(ip)
+        splited_ip = cidr.first.split('.')
+        # calculate gateway according to /18 subnet
+        # ex:
+        #   10.28.64.0/18 => -.-.01xx xxxx.254/18
+        #
+        #   0011 1111 = 63
+        # + 0100 0000 = 64
+        # ----------------
+        #   0111 1111 = 127
+        c=(splited_ip[2].to_i+63).to_s
+        @gateway = splited_ip[0].to_s+"."+splited_ip[1].to_s+"."+c+".254"
+        @dns="131.254.203.235"
+        @ipstart = cidr.first
+        @ipend = cidr.last
+        puts "First IP: " + @ipstart
+        puts "Last IP : " + @ipend
+        puts "gateway : " + @gateway
+        puts "DNS     : " + @dns
+      else
+        puts "Wrong vlan number"
+      end
     end
     
     task :template do
@@ -268,10 +289,20 @@ namespace :openstack do
       set :default_environment, rc('test')
       set :user, "root"
       controllerAddress = capture "facter ipaddress"
+
+      # get vlan number using the jobname variable
+      vlan = $myxp.job_with_name("#{jobname}")['resources_by_type']['vlans'].first.to_i
+      # get corresponding IP and add 30 to the c part to not collide with any host of g5k
+      vlan_config = YAML::load_file("#{openstack_path}/vlan-config.yaml")
+      ip=vlan_config["#{site}"][vlan]
+      cidr =  NetAddr::CIDR.create(ip)
+      splited_ip = cidr.first.split('.')
+      c=(splited_ip[2].to_i+30).to_s
+
       # we choose a range of ips which doen't collide with any host of g5k 
       # see https://www.grid5000.fr/mediawiki/index.php/User:Lnussbaum/Network#KaVLAN
       # here 255 hosts only
-      nova_net = controllerAddress.gsub(/(\d)+\.(\d)+$/, "230.0/24")
+      nova_net = controllerAddress.gsub(/(\d)+\.(\d)+$/, c+".0/24")
       run "nova network-create net-jdoe --bridge br100 --multi-host T --fixed-range-v4 #{nova_net}"
       run "nova net-list"
     end
