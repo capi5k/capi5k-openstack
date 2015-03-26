@@ -21,12 +21,13 @@ capi5k-openstack
 * Base image : ubuntu1204
 * Openstack Icehouse
 * Legacy network configured to be high available (one nova-network / compute node)
-* Nodes are put in a VLAN (global only, support for local routed VLAN in progress)
+* Nodes are put in a local routed VLAN.
 
 This script has been successfully tested in :
 * Rennes site
 * Lyon site
 * Nancy site
+* Toulouse site
 
 Openstack is bootstraped with the following:
 
