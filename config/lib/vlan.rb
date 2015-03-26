@@ -1,7 +1,10 @@
-def translate_vlan(nodes, vlan = "-1")
-  if (vlan == "-1")
+def translate_vlan(nodes, jobname = "-1")
+  if (jobname == "-1")
     return nodes
   end
+
+  # get vlan number using the jobname variable
+  vlan = $myxp.job_with_name("#{jobname}")['resources_by_type']['vlans'].first
 
   to_translate = nodes
   puts to_translate.inspect
