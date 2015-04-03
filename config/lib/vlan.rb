@@ -4,7 +4,7 @@ def translate_vlan(nodes, jobname = "-1")
   end
 
   # get vlan number using the jobname variable
-  vlan = $myxp.job_with_name("#{jobname}")['resources_by_type']['vlans'].first
+  vlan = $myxp.job_with_name("#{XP5K::Config[:jobname]}")['resources_by_type']['vlans'].first
 
   to_translate = nodes
   puts to_translate.inspect

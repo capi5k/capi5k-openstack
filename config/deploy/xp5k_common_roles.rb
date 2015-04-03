@@ -15,9 +15,9 @@ end
 =end
 
 role :frontend do
-    "#{site}"
+    "#{XP5K::Config[:site]}"
 end
 
 role :subnet do
-    "#{site}"
+    "#{XP5K::Config[:site]}"
 end

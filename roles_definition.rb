@@ -24,6 +24,6 @@ end
 
 
 role :frontend do
-  "#{site}"
+  "#{XP5K::Config[:site]}"
 end
 

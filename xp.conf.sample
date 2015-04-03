@@ -1,0 +1,17 @@
+## OAR jobs defaults
+# jobname and cluster are optional
+jobname         'openstack'
+site            'nancy'
+cluster         'graphene'
+walltime        '1:00:00'
+
+## number of nodes given to OpenStack
+# should be at least 3
+# 2 of them are use by different services
+# 1+ will be used for compute nodes
+nodes           6
+
+## vlantype values:
+# "kavlan"        - routed local vlan
+# "kavlan-global" - global vlan
+vlantype        'kavlan'
