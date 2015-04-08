@@ -7,6 +7,14 @@ require 'erb'
 #
 XP5K::Config.load
 
+# Capistrano variables
+#
+# sets the gateway if required in the xp.conf
+set :gateway, XP5K::Config[:gateway] if XP5K::Config[:gateway]
+# fall back to default rsa private key in case of missing parameter
+XP5K::Config[:private_key] ||= File.join(ENV["HOME"], ".ssh", "id_rsa")
+ssh_options[:keys]= [XP5K::Config[:private_key]]
+
 # Defaults configuration
 #
 XP5K::Config[:jobname]    ||= 'openstack'
@@ -15,6 +23,7 @@ XP5K::Config[:walltime]   ||= '1:00:00'
 XP5K::Config[:cluster]    ||= ''
 XP5K::Config[:vlantype]   ||= 'kavlan'
 XP5K::Config[:nodes]      ||= '3'
+XP5K::Config[:ssh_public] ||= File.join(ENV["HOME"], ".ssh", "id_rsa.pub")
 
 cluster = "and cluster='" + XP5K::Config[:cluster] + "'" if !XP5K::Config[:cluster].empty?
 
@@ -39,7 +48,10 @@ $myxp.define_deployment({
   :environment    => "ubuntu-x64-1204",
   :roles          => %w(capi5k-init),
   :vlan_from_job  => XP5K::Config[:jobname],
-  :key            => File.read("#{ssh_public}"), 
+  :key            => File.read(XP5K::Config[:ssh_public]), 
 })
 
 load "config/deploy/xp5k_common_tasks.rb"
+
+
+

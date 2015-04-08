@@ -82,9 +82,7 @@ namespace :openstack do
       install
     end
 
-    task :subnet, :roles => [:frontend] do
-      set :user, "#{g5k_user}"
-
+    task :subnet do
       # get vlan number using the jobname variable
       vlan = $myxp.job_with_name("#{XP5K::Config[:jobname]}")['resources_by_type']['vlans'].first.to_i
 
