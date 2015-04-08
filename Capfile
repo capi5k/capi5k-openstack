@@ -12,7 +12,7 @@ task :automatic do
  puts "Welcome to automatic deployment".bold.blue
 end
 
-after "automatic", "xp5k"
+after "automatic", "xp5k", "puppetcluster", "openstack", "openstack:bootstrap"
 
 # the following images will be uploaded during cap openstack:bootstrap
 $images = []
