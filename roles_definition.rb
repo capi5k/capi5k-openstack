@@ -7,19 +7,19 @@
 #
 
 role :controller do
-  role_controller
-end
-
-role :compute do
-  role_compute
+  translate_vlan($myxp.get_deployed_nodes('capi5k-init')[1], "#{XP5K::Config[:jobname]}")
 end
 
 role :storage do
-  role_storage
+  translate_vlan($myxp.get_deployed_nodes('capi5k-init')[1], "#{XP5K::Config[:jobname]}")
+end
+
+role :compute do
+  translate_vlan($myxp.get_deployed_nodes('capi5k-init').slice(2..-1), "#{XP5K::Config[:jobname]}")
 end
 
 role :openstack do
-  role_openstack
+  translate_vlan($myxp.get_deployed_nodes('capi5k-init').slice(1..-1), "#{XP5K::Config[:jobname]}")
 end
 
 

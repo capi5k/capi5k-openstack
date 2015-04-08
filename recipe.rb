@@ -4,7 +4,6 @@ require 'yaml'
 
 set :openstack_path, "."
 
-load "#{openstack_path}/roles.rb"
 load "#{openstack_path}/roles_definition.rb"
 load "#{openstack_path}/output.rb"
 
