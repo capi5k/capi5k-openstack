@@ -7,4 +7,4 @@ hiera/
 # prevent conflict on xp5k cutomization
 config/
 Gemfile.lock
-
+xp.conf

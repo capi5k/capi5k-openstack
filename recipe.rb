@@ -86,14 +86,14 @@ namespace :openstack do
       set :user, "#{g5k_user}"
 
       # get vlan number using the jobname variable
-      vlan = $myxp.job_with_name("#{jobname}")['resources_by_type']['vlans'].first.to_i
+      vlan = $myxp.job_with_name("#{XP5K::Config[:jobname]}")['resources_by_type']['vlans'].first.to_i
 
       case vlan
       when 1 .. 3
         puts "Non-routed local vlans not supported"
       when 4 .. 21
         vlan_config = YAML::load_file("#{openstack_path}/vlan-config.yaml")
-        ip=vlan_config["#{site}"][vlan]
+        ip=vlan_config["#{XP5K::Config[:site]}"][vlan]
         cidr =  NetAddr::CIDR.create(ip)
         splited_ip = cidr.first.split('.')
         # calculate gateway according to /18 subnet
@@ -291,10 +291,10 @@ namespace :openstack do
       controllerAddress = capture "facter ipaddress"
 
       # get vlan number using the jobname variable
-      vlan = $myxp.job_with_name("#{jobname}")['resources_by_type']['vlans'].first.to_i
+      vlan = $myxp.job_with_name("#{XP5K::Config[:jobname]}")['resources_by_type']['vlans'].first.to_i
       # get corresponding IP and add 30 to the c part to not collide with any host of g5k
       vlan_config = YAML::load_file("#{openstack_path}/vlan-config.yaml")
-      ip=vlan_config["#{site}"][vlan]
+      ip=vlan_config["#{XP5K::Config[:site]}"][vlan]
       cidr =  NetAddr::CIDR.create(ip)
       splited_ip = cidr.first.split('.')
       c=(splited_ip[2].to_i+30).to_s
