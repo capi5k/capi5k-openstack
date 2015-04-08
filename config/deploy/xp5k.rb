@@ -24,6 +24,7 @@ XP5K::Config[:cluster]    ||= ''
 XP5K::Config[:vlantype]   ||= 'kavlan'
 XP5K::Config[:nodes]      ||= '3'
 XP5K::Config[:ssh_public] ||= File.join(ENV["HOME"], ".ssh", "id_rsa.pub")
+XP5K::Config[:images]     ||= []
 
 cluster = "and cluster='" + XP5K::Config[:cluster] + "'" if !XP5K::Config[:cluster].empty?
 

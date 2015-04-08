@@ -275,9 +275,9 @@ namespace :openstack do
     task :images, :roles => [:controller] do
       set :default_environment, rc('test')
       set :user, "root"
-       $images.each do |image|
+       XP5K::Config[:images].each do |image|
         run "wget #{image[:url]} -O #{image[:name]}"
-        run "glance add name='#{image[:short]}' is_public=true container_format=ovf disk_format=qcow2 < #{image[:name]}"
+        run "glance add name='#{image[:name]}' is_public=true container_format=ovf disk_format=qcow2 < #{image[:name]}"
         run "nova image-list"
       end
     end
