@@ -237,7 +237,7 @@ namespace :openstack do
         run "cp /etc/puppet/manifests/site_ntx.pp /etc/puppet/manifests/site.pp"
       end
 
-      task :network_apply, :roles => [:compute] do
+      task :network_apply, :roles => [:compute], :on_error => :continue do
         set :user, "root"
         run "sleep $(( RANDOM%120 + 1 )) && puppet agent -t"
       end
@@ -368,8 +368,8 @@ namespace :openstack do
 
     desc 'reminder about booting a VMs'
     task :nova_boot do
-      puts "You are now ready to boot a VM : (change the net-id) "
-      puts "nova boot --flavor 3 --security_groups vm_jdoe_sec_group --image ubuntu-image --nic net-id=a665bfd4-53da-41a8-9bd6-bab03c09b890 --key_name jdoe_key  ubuntu-vm"
+      puts "You are now ready to boot a VM as demo user: (change the net-id) "
+      puts "nova boot --flavor 3 --security_groups vm_jdoe_sec_group --image ubuntu-13.10 --nic net-id=a665bfd4-53da-41a8-9bd6-bab03c09b890 --key_name jdoe_key  ubuntu-vm"
     end
 
   end

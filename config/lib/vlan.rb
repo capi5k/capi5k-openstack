@@ -7,7 +7,6 @@ def translate_vlan(nodes, jobname = "-1")
   vlan = $myxp.job_with_name("#{XP5K::Config[:jobname]}")['resources_by_type']['vlans'].first
 
   to_translate = nodes
-  puts to_translate.inspect
   if !nodes.respond_to?('each')
     to_translate = [nodes]
   end
