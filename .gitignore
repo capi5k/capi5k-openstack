@@ -6,5 +6,6 @@ tmp/*
 hiera/
 # prevent conflict on xp5k cutomization
 config/
+puppet/
 Gemfile.lock
-
+xp.conf

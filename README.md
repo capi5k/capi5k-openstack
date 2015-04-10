@@ -3,20 +3,17 @@ capi5k-openstack
 
 ### Summary
 
-  * Overview
-    * What kind of deployment is it ?
-    * Prerequisites : see http://capi5k.github.io/capi5k/
-  * Deploy
-    * Check the deployment
-  * Boot VMs
-    * Using Nova
-    * Using EC2
-    * Using the web interface
-  * Customize the deployment
+  * [Overview](#overview)
+  * [Deploy](#deploy)
+    * [From inside Grid'5000](from-inside-grid'5000)
+    * [From outside Grid'5000](from-outside-grid'5000)
+    * [Check the deployment](check-the-deployment)
+  * [Boot VMs](#boot-vms)
+    * [Using Nova](#using-nova)
+    * [Using EC2](#using-ec2)
+    * [Using the web interface](#using-the-web-interface)
 
 ## Overview
-
-### What kind of deployment is it ?
 
 * Base image : ubuntu1204
 * Openstack Icehouse
@@ -31,7 +28,8 @@ This script has been successfully tested in :
 
 Openstack is bootstraped with the following:
 
-* One base image (can be adapted easily in the ```Capfile```)
+* Some base images (see ```xp.conf```)
+
 ```
 nova image-list
 +--------------------------------------+--------------+--------+--------+
@@ -39,8 +37,11 @@ nova image-list
 +--------------------------------------+--------------+--------+--------+
 | ec350d7b-e075-4725-baa0-42fc547a277b | ubuntu-13.10 | ACTIVE |        |
 +--------------------------------------+--------------+--------+--------+
+
 ```
-* One network used for the VMs IPs (automatically generated from the vlan network)
+
+* One network ```/24``` used for the VMs IPs (automatically generated from the vlan network)
+
 ```
 nova net-list
 +--------------------------------------+----------+----------------+
@@ -49,6 +50,7 @@ nova net-list
 | 8462e71b-81ce-4d0f-8bfd-10f8bb73b29c | net-jdoe | 10.27.230.0/24 |
 +--------------------------------------+----------+----------------+
 ```
+
 * 2 specific users (see ```common.yml.erb```)
   * demo is in the demo tenant
   * test has admin permissions.
@@ -75,27 +77,79 @@ total 242380
 ...
 ```
 
-### Prerequisites : see http://capi5k.github.io/capi5k/
-
 ## Deploy
 
-* ``` xpm install ```
-* ``` bundle install ```
 
-Submit / Deploy linux base image, bootstrap a puppet cluster on the nodes.
-* ```cap automatic puppetcluster; cap puppetcluster``` (yes, twice puppetcluster ... see below)
+### From inside Grid'5000
 
-Note : for deployment at scale, one can use ```cap puppetcluster:passenger``` in addition to provide
-passenger support to the puppet master.
+* Connect to the frontend of your choice
 
-Deploy openstack.
-*  ```cap openstack```
+* Configure [restfully](https://github.com/crohr/restfully)
 
-Run some initializations
-*  ```cap openstack:bootstrap```
+```
+mkdir ~/.restfully
+echo "base_uri: https://api.grid5000.fr/3.0/" > ~/.restfully/api.grid5000.fr.yml
+```
 
+* Enable proxy
 
-## check the deployment
+```
+export http_proxy=http://proxy:3128
+export https_proxy=http://proxy:3128
+```
+
+* Install bundler and make ruby executables available
+
+```
+gem install bundler --user
+export PATH=$PATH:$HOME/.gem/ruby/1.9.1/bin
+```
+
+* Download the latest bundle release tarball and install the ruby dependencies
+
+```
+wget TODO
+cd
+bundle install --path ~/.gem
+```
+
+* Create the ```xp.conf```file from the ```xp.conf.sample```, adapt it to your needs.
+
+### From oustside Grid'5000
+
+* Configure  [restfully](https://github.com/crohr/restfully)
+
+```
+echo '
+uri: https://api.grid5000.fr/3.0/
+username: MYLOGIN
+password: MYPASSWORD
+' > ~/.restfully/api.grid5000.fr.yml && chmod 600 ~/.restfully/api.grid5000.fr.yml
+```
+
+* (optional but highly recommended) Install [rvm](http://rvm.io)
+
+* Download the latest bundle release tarball and install the ruby dependencies
+
+```
+wget TODO
+cd
+bundle install
+```
+
+### Configure and launch the deployment
+
+* Create the ```xp.conf```file from the ```xp.conf.sample```, adapt it to your needs.
+
+* Launch the deployment :
+
+```
+cap automatic
+```
+
+> The above is a shortcut for cap submit deploy puppetcluster openstack openstack:bootstrap
+
+### Check the deployment
 
 * ```cap describe```
 
@@ -142,12 +196,12 @@ nova-scheduler   parapluie-32-kavlan-16.rennes.grid5000.fr internal         enab
 
 ## Boot VMs
 
-### Using nova
+### Using Nova
 
 ```
 # use demo user
 (controller) source demorc
-(controller) nova boot --flavor 3 --security_groups vm_jdoe_sec_group --image ubuntu-image --nic net-id=a665bfd4-53da-41a8-9bd6-bab03c09b890 --key_name jdoe_key  ubuntu-vm
+(controller) nova boot --flavor 3 --security_groups vm_jdoe_sec_group --image ubuntu-13.10 --nic net-id=a665bfd4-53da-41a8-9bd6-bab03c09b890 --key_name jdoe_key  ubuntu-vm
 ```
 
 Note : Get the list of nets / images  ...
@@ -159,7 +213,7 @@ nova keypair-list
 ````
 
 
-### Using the EC2 interface
+### Using EC2
 
 
 ```
@@ -168,7 +222,7 @@ nova keypair-list
 (controller) EC2_ACCESS_KEY=224de6d07e5342dea886f64384e8d27e EC2_SECRET_KEY=8d70469c8fba4b7194d1f0276d33b813 EC2_URL=http://10.27.204.144:8773/services/Cloud euca-run-instances -n 1 -g vm_jdoe_sec_group -k jdoe_key -t m1.medium ubuntu-13.10
 ```
 
-### Using the web Gui
+### Using the web interface
 
 ```
 (laptop) ssh -NL 8000:parapluie-32-kavlan-16.rennes.grid5000.fr:80 access.grid5000.fr

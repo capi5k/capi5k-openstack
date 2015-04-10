@@ -5,7 +5,6 @@ require 'yaml'
 set :openstack_path, "."
 
 load "#{openstack_path}/roles.rb"
-load "#{openstack_path}/roles_definition.rb"
 load "#{openstack_path}/output.rb"
 
 set :proxy, "http_proxy=http://proxy:3128 https_proxy=http://proxy:3128"
@@ -14,7 +13,7 @@ set :puppet_p, "#{proxy} puppet"
 
 # return the hash map credentials
 def rc(name)
-  config = YAML::load_file("#{openstack_path}/hiera/common.yaml")
+  config = YAML::load_file("#{openstack_path}/puppet/hiera/common.yaml")
   user = config["openstack::keystone::users"][name]
   if (user.nil?)
     return {}
@@ -62,14 +61,15 @@ namespace :openstack do
 
     task :prepare, :roles => [:puppet_master], :on_error => :continue  do
       set :user, "root"
+      run "rm -rf /etc/puppet/modules"
       run "#{puppet_p} module install puppetlabs-openstack -v 4.2.0"
-      upload "#{openstack_path}/openstackg5k", "/etc/puppet/modules", :via => :scp, :recursive => :true
+      upload "#{openstack_path}/puppet/openstackg5k", "/etc/puppet/modules", :via => :scp, :recursive => :true
     end 
 
     desc 'Apply patches'
     task :patchs, :roles => [:puppet_master] do
       set :user, "root"
-      upload "#{openstack_path}/patchs/modules", "/etc/puppet/", :via => :scp, :recursive => :true
+      upload "#{openstack_path}/puppet/patchs/modules", "/etc/puppet/", :via => :scp, :recursive => :true
     end
   end
 
@@ -82,18 +82,16 @@ namespace :openstack do
       install
     end
 
-    task :subnet, :roles => [:frontend] do
-      set :user, "#{g5k_user}"
-
+    task :subnet do
       # get vlan number using the jobname variable
-      vlan = $myxp.job_with_name("#{jobname}")['resources_by_type']['vlans'].first.to_i
+      vlan = $myxp.job_with_name("#{XP5K::Config[:jobname]}")['resources_by_type']['vlans'].first.to_i
 
       case vlan
       when 1 .. 3
         puts "Non-routed local vlans not supported"
       when 4 .. 21
-        vlan_config = YAML::load_file("#{openstack_path}/vlan-config.yaml")
-        ip=vlan_config["#{site}"][vlan]
+        vlan_config = YAML::load_file("#{openstack_path}/config/vlan-config.yaml")
+        ip=vlan_config["#{XP5K::Config[:site]}"][vlan]
         cidr =  NetAddr::CIDR.create(ip)
         splited_ip = cidr.first.split('.')
         # calculate gateway according to /18 subnet
@@ -139,7 +137,7 @@ namespace :openstack do
       template = File.read("#{openstack_path}/templates/common.yaml.erb")
       renderer = ERB.new(template)
       generate = renderer.result(binding)
-      myFile = File.open("#{openstack_path}/hiera/common.yaml", "w")
+      myFile = File.open("#{openstack_path}/puppet/hiera/common.yaml", "w")
       myFile.write(generate)
       myFile.close
 
@@ -147,7 +145,7 @@ namespace :openstack do
 
     task :install, :roles => [:puppet_master] do
       set :user, "root"
-      upload("#{openstack_path}/hiera","/etc/puppet", :via => :scp, :recursive => true)
+      upload("#{openstack_path}/puppet/hiera","/etc/puppet", :via => :scp, :recursive => true)
       run("mv /etc/puppet/hiera/hiera.yaml /etc/puppet/.")
     end
 
@@ -215,15 +213,17 @@ namespace :openstack do
     end
 
     desc 'Provision the controller'
-    task :controller, :roles => [:controller], :on_error => :continue do
+    task :controller, :roles => [:controller] do
       set :user, "root"
-      run "puppet agent -t"
+      # it seems that using, :on_error => :continue fails on the following tasks
+      # no server for ... we force to true
+      run "puppet agent -t || true"
     end
 
     desc 'Provision the other nodes'
-    task :others, :roles => [:compute], :max_hosts => 20, :on_error => :continue do
+    task :others, :roles => [:compute], :max_hosts => 20 do
       set :user, "root"
-      run "sleep $(( RANDOM%120 + 1 )) && puppet agent -t"
+      run "sleep $(( RANDOM%120 + 1 )) && puppet agent -t || true"
     end
   
     namespace :network do
@@ -242,7 +242,7 @@ namespace :openstack do
 
       task :network_apply, :roles => [:compute] do
         set :user, "root"
-        run "sleep $(( RANDOM%120 + 1 )) && puppet agent -t"
+        run "sleep $(( RANDOM%120 + 1 )) && puppet agent -t || true"
       end
 
       desc "Restart compute services (network/compute/cert/api-metadat)"
@@ -271,6 +271,7 @@ namespace :openstack do
 
     task :upload_keys, :roles => [:controller] do
       set :user, "root"
+      run "rm -f /root/.ssh/id_rsa*"
       run 'ssh-keygen -f /root/.ssh/id_rsa -N ""'
       run "chmod 600 -R /root/.ssh"
     end
@@ -278,9 +279,9 @@ namespace :openstack do
     task :images, :roles => [:controller] do
       set :default_environment, rc('test')
       set :user, "root"
-       $images.each do |image|
-        run "wget #{image[:url]} -O #{image[:name]}"
-        run "glance add name='#{image[:short]}' is_public=true container_format=ovf disk_format=qcow2 < #{image[:name]}"
+       XP5K::Config[:images].each do |image|
+        run "wget -q #{image[:url]} -O #{image[:name]}"
+        run "glance add name='#{image[:name]}' is_public=true container_format=ovf disk_format=qcow2 < #{image[:name]}"
         run "nova image-list"
       end
     end
@@ -291,10 +292,10 @@ namespace :openstack do
       controllerAddress = capture "facter ipaddress"
 
       # get vlan number using the jobname variable
-      vlan = $myxp.job_with_name("#{jobname}")['resources_by_type']['vlans'].first.to_i
+      vlan = $myxp.job_with_name("#{XP5K::Config[:jobname]}")['resources_by_type']['vlans'].first.to_i
       # get corresponding IP and add 30 to the c part to not collide with any host of g5k
-      vlan_config = YAML::load_file("#{openstack_path}/vlan-config.yaml")
-      ip=vlan_config["#{site}"][vlan]
+      vlan_config = YAML::load_file("#{openstack_path}/config/vlan-config.yaml")
+      ip=vlan_config["#{XP5K::Config[:site]}"][vlan]
       cidr =  NetAddr::CIDR.create(ip)
       splited_ip = cidr.first.split('.')
       c=(splited_ip[2].to_i+30).to_s
@@ -371,8 +372,8 @@ namespace :openstack do
 
     desc 'reminder about booting a VMs'
     task :nova_boot do
-      puts "You are now ready to boot a VM : (change the net-id) "
-      puts "nova boot --flavor 3 --security_groups vm_jdoe_sec_group --image ubuntu-image --nic net-id=a665bfd4-53da-41a8-9bd6-bab03c09b890 --key_name jdoe_key  ubuntu-vm"
+      puts "You are now ready to boot a VM as demo user: (change the net-id) "
+      puts "nova boot --flavor 3 --security_groups vm_jdoe_sec_group --image ubuntu-13.10 --nic net-id=a665bfd4-53da-41a8-9bd6-bab03c09b890 --key_name jdoe_key  ubuntu-vm"
     end
 
   end
