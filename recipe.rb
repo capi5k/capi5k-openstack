@@ -294,7 +294,7 @@ namespace :openstack do
       # get vlan number using the jobname variable
       vlan = $myxp.job_with_name("#{XP5K::Config[:jobname]}")['resources_by_type']['vlans'].first.to_i
       # get corresponding IP and add 30 to the c part to not collide with any host of g5k
-      vlan_config = YAML::load_file("#{openstack_path}/vlan-config.yaml")
+      vlan_config = YAML::load_file("#{openstack_path}/config/vlan-config.yaml")
       ip=vlan_config["#{XP5K::Config[:site]}"][vlan]
       cidr =  NetAddr::CIDR.create(ip)
       splited_ip = cidr.first.split('.')
