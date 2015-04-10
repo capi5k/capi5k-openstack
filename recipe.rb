@@ -4,7 +4,7 @@ require 'yaml'
 
 set :openstack_path, "."
 
-load "#{openstack_path}/roles_definition.rb"
+load "#{openstack_path}/roles.rb"
 load "#{openstack_path}/output.rb"
 
 set :proxy, "http_proxy=http://proxy:3128 https_proxy=http://proxy:3128"
@@ -13,7 +13,7 @@ set :puppet_p, "#{proxy} puppet"
 
 # return the hash map credentials
 def rc(name)
-  config = YAML::load_file("#{openstack_path}/hiera/common.yaml")
+  config = YAML::load_file("#{openstack_path}/puppet/hiera/common.yaml")
   user = config["openstack::keystone::users"][name]
   if (user.nil?)
     return {}
@@ -61,14 +61,15 @@ namespace :openstack do
 
     task :prepare, :roles => [:puppet_master], :on_error => :continue  do
       set :user, "root"
+      run "rm -rf /etc/puppet/modules"
       run "#{puppet_p} module install puppetlabs-openstack -v 4.2.0"
-      upload "#{openstack_path}/openstackg5k", "/etc/puppet/modules", :via => :scp, :recursive => :true
+      upload "#{openstack_path}/puppet/openstackg5k", "/etc/puppet/modules", :via => :scp, :recursive => :true
     end 
 
     desc 'Apply patches'
     task :patchs, :roles => [:puppet_master] do
       set :user, "root"
-      upload "#{openstack_path}/patchs/modules", "/etc/puppet/", :via => :scp, :recursive => :true
+      upload "#{openstack_path}/puppet/patchs/modules", "/etc/puppet/", :via => :scp, :recursive => :true
     end
   end
 
@@ -89,7 +90,7 @@ namespace :openstack do
       when 1 .. 3
         puts "Non-routed local vlans not supported"
       when 4 .. 21
-        vlan_config = YAML::load_file("#{openstack_path}/vlan-config.yaml")
+        vlan_config = YAML::load_file("#{openstack_path}/config/vlan-config.yaml")
         ip=vlan_config["#{XP5K::Config[:site]}"][vlan]
         cidr =  NetAddr::CIDR.create(ip)
         splited_ip = cidr.first.split('.')
@@ -136,7 +137,7 @@ namespace :openstack do
       template = File.read("#{openstack_path}/templates/common.yaml.erb")
       renderer = ERB.new(template)
       generate = renderer.result(binding)
-      myFile = File.open("#{openstack_path}/hiera/common.yaml", "w")
+      myFile = File.open("#{openstack_path}/puppet/hiera/common.yaml", "w")
       myFile.write(generate)
       myFile.close
 
@@ -144,7 +145,7 @@ namespace :openstack do
 
     task :install, :roles => [:puppet_master] do
       set :user, "root"
-      upload("#{openstack_path}/hiera","/etc/puppet", :via => :scp, :recursive => true)
+      upload("#{openstack_path}/puppet/hiera","/etc/puppet", :via => :scp, :recursive => true)
       run("mv /etc/puppet/hiera/hiera.yaml /etc/puppet/.")
     end
 
@@ -212,15 +213,17 @@ namespace :openstack do
     end
 
     desc 'Provision the controller'
-    task :controller, :roles => [:controller], :on_error => :continue do
+    task :controller, :roles => [:controller] do
       set :user, "root"
-      run "puppet agent -t"
+      # it seems that using, :on_error => :continue fails on the following tasks
+      # no server for ... we force to true
+      run "puppet agent -t || true"
     end
 
     desc 'Provision the other nodes'
-    task :others, :roles => [:compute], :max_hosts => 20, :on_error => :continue do
+    task :others, :roles => [:compute], :max_hosts => 20 do
       set :user, "root"
-      run "sleep $(( RANDOM%120 + 1 )) && puppet agent -t"
+      run "sleep $(( RANDOM%120 + 1 )) && puppet agent -t || true"
     end
   
     namespace :network do
@@ -237,9 +240,9 @@ namespace :openstack do
         run "cp /etc/puppet/manifests/site_ntx.pp /etc/puppet/manifests/site.pp"
       end
 
-      task :network_apply, :roles => [:compute], :on_error => :continue do
+      task :network_apply, :roles => [:compute] do
         set :user, "root"
-        run "sleep $(( RANDOM%120 + 1 )) && puppet agent -t"
+        run "sleep $(( RANDOM%120 + 1 )) && puppet agent -t || true"
       end
 
       desc "Restart compute services (network/compute/cert/api-metadat)"
@@ -268,6 +271,7 @@ namespace :openstack do
 
     task :upload_keys, :roles => [:controller] do
       set :user, "root"
+      run "rm -f /root/.ssh/id_rsa*"
       run 'ssh-keygen -f /root/.ssh/id_rsa -N ""'
       run "chmod 600 -R /root/.ssh"
     end
