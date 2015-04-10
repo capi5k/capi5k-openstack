@@ -15,6 +15,6 @@
   ],
   "dependencies" : 
   {
-    "capi5k-puppetcluster": "https://github.com/capi5k/capi5k-puppetcluster/tarball/master"
+    "capi5k-puppetcluster": "https://github.com/capi5k/capi5k-puppetcluster/tarball/0.0.1"
   } 
 }
