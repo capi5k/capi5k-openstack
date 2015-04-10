@@ -26,3 +26,8 @@ if File.exist?("recipe.rb")
 end
 
 
+# load extra recipes.
+extras = Dir.glob("recipes/*.rb")
+extras.each do |extra|
+  load "#{extra}"
+end
