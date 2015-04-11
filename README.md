@@ -105,11 +105,11 @@ gem install bundler --user
 export PATH=$PATH:$HOME/.gem/ruby/1.9.1/bin
 ```
 
-* Download the latest bundle release tarball and install the ruby dependencies
+* Download the latest bundle release tarball (```capi5k-openstack-x.y.z-bundle.tar.gz```)
+from the [releases page](https://github.com/capi5k/capi5k-openstack/releases).
 
 ```
-wget TODO
-cd
+cd capi5k-openstack*
 bundle install --path ~/.gem
 ```
 
@@ -129,12 +129,12 @@ password: MYPASSWORD
 
 * (optional but highly recommended) Install [rvm](http://rvm.io)
 
-* Download the latest bundle release tarball and install the ruby dependencies
+* Download the latest bundle release tarball (```capi5k-openstack-x.y.z-bundle.tar.gz```)
+from the [releases page](https://github.com/capi5k/capi5k-openstack/releases).
 
 ```
-wget TODO
-cd
-bundle install
+cd capi5k-openstack*
+bundle install --path ~/.gem
 ```
 
 ### Configure and launch the deployment
