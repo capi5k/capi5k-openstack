@@ -31,4 +31,8 @@ private_key   File.join(ENV["HOME"], ".ssh", "id_rsa")
 images [{
   :name  => "ubuntu-13.10",
   :url   => "http://public.rennes.grid5000.fr/~msimonin/ubuntu-13.10-server-clouding-amd64-disk1.img"
+  },
+  {
+  :name  => "ubuntu-hadoop-1.2.1",
+  :url   => "http://public.rennes.grid5000.fr/~gmoualla/images/sahara-icehouse-vanilla-1.2.1-ubuntu-13.10.qcow2"
   }]
