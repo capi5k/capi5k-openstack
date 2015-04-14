@@ -20,12 +20,6 @@ capi5k-openstack
 * Legacy network configured to be high available (one nova-network / compute node)
 * Nodes are put in a local routed VLAN.
 
-This script has been successfully tested in :
-* Rennes site
-* Lyon site
-* Nancy site
-* Toulouse site
-
 Openstack is bootstraped with the following:
 
 * Some base images (see ```xp.conf```)
@@ -114,6 +108,8 @@ bundle install --path ~/.gem
 ```
 
 * Create the ```xp.conf```file from the ```xp.conf.sample```, adapt it to your needs.
+
+> Comment the ```gateway``` line
 
 ### From oustside Grid'5000
 
