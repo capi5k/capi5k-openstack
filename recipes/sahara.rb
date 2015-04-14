@@ -15,7 +15,7 @@ namespace :sahara do
     run "apt-get install -y python-pip"
     run "pip install MySQL-python"
     run "apt-get install -y python-pip libmysqlclient-dev python-dev"
-    run "#{proxy} pip install http://tarballs.openstack.org/sahara/sahara-2015.1.0rc1.tar.gz"
+    run "#{proxy} pip install sahara"
     run "#{proxy} pip install sahara-dashboard"
   end
   
