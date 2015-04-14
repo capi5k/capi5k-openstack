@@ -20,12 +20,6 @@ capi5k-openstack
 * Legacy network configured to be high available (one nova-network / compute node)
 * Nodes are put in a local routed VLAN.
 
-This script has been successfully tested in :
-* Rennes site
-* Lyon site
-* Nancy site
-* Toulouse site
-
 Openstack is bootstraped with the following:
 
 * Some base images (see ```xp.conf```)
@@ -105,15 +99,17 @@ gem install bundler --user
 export PATH=$PATH:$HOME/.gem/ruby/1.9.1/bin
 ```
 
-* Download the latest bundle release tarball and install the ruby dependencies
+* Download the latest bundle release tarball (```capi5k-openstack-x.y.z-bundle.tar.gz```)
+from the [releases page](https://github.com/capi5k/capi5k-openstack/releases).
 
 ```
-wget TODO
-cd
+cd capi5k-openstack*
 bundle install --path ~/.gem
 ```
 
 * Create the ```xp.conf```file from the ```xp.conf.sample```, adapt it to your needs.
+
+> Comment the ```gateway``` line
 
 ### From oustside Grid'5000
 
@@ -129,17 +125,18 @@ password: MYPASSWORD
 
 * (optional but highly recommended) Install [rvm](http://rvm.io)
 
-* Download the latest bundle release tarball and install the ruby dependencies
+* Download the latest bundle release tarball (```capi5k-openstack-x.y.z-bundle.tar.gz```)
+from the [releases page](https://github.com/capi5k/capi5k-openstack/releases).
 
 ```
-wget TODO
-cd
-bundle install
+cd capi5k-openstack*
+bundle install --path ~/.gem
 ```
-
-### Configure and launch the deployment
 
 * Create the ```xp.conf```file from the ```xp.conf.sample```, adapt it to your needs.
+
+
+### Configure and launch the deployment
 
 * Launch the deployment :
 
@@ -228,13 +225,3 @@ nova keypair-list
 (laptop) ssh -NL 8000:parapluie-32-kavlan-16.rennes.grid5000.fr:80 access.grid5000.fr
 ```
 And then visit ```http://127.0.0.1:8000/horizon```
-
-## Customize the deployment
-
- * Change the config/xp5k/xp5k.rb file to fit your need.
- The VLAN must be set manually (even if it's now possible to automate using the API)
-
- * You'll find some tuning possibilities in templates/common.yml.erb
- The hiera store is generated using this file.
-
- * Some classes are overriden to fit into G5K  (see openstackg5k module)

@@ -262,6 +262,7 @@ namespace :openstack do
       upload_keys
       images
       network
+      testrc
       admin_ec2
       quotas
       demo::default
@@ -307,6 +308,15 @@ namespace :openstack do
       run "nova network-create net-jdoe --bridge br100 --multi-host T --fixed-range-v4 #{nova_net}"
       run "nova net-list"
     end
+    
+    task :testrc, :roles => [:controller] do
+      set :user, "root"
+      rc = rc("test")
+      run "echo \"\" > testrc" 
+      rc.each do |k,v| 
+        run "echo \"export #{k}=#{v}\" >> testrc"
+      end
+    end
 
     task :admin_ec2, :roles => [:controller] do
       set :default_environment, rc('test')
@@ -333,6 +343,8 @@ namespace :openstack do
       desc 'Bootstrap the demo user'
       task :default do
         demorc
+        keypair
+        sec_group
         ec2 
       end
 
@@ -345,20 +357,33 @@ namespace :openstack do
         end
       end
 
-      task :ec2, :roles => [:controller] do
+      task :keypair, :roles => [:controller] do
         set :user, "root"
         set :default_environment, rc('demo')
         run "nova keypair-add --pub_key /root/.ssh/id_rsa.pub jdoe_key"
+      end
+
+      # we allow all traffic on the default sec group as well
+      task :sec_group, :roles => [:controller] do
+        set :user, "root"
+        set :default_environment, rc('demo')
+        run "nova secgroup-add-rule default tcp 1 65535 0.0.0.0/0"
+        run "nova secgroup-add-rule default udp 1 65535 0.0.0.0/0"
+        run "nova secgroup-add-rule default icmp -1 -1 0.0.0.0/0"
+        run "nova secgroup-list-rules default"
         run "nova secgroup-create vm_jdoe_sec_group 'vm_jdoe_sec_group test security group'"
         run "nova secgroup-add-rule vm_jdoe_sec_group tcp 1 65535 0.0.0.0/0"
         run "nova secgroup-add-rule vm_jdoe_sec_group udp 1 65535 0.0.0.0/0"
         run "nova secgroup-add-rule vm_jdoe_sec_group icmp -1 -1 0.0.0.0/0"
         run "nova secgroup-list-rules vm_jdoe_sec_group"
-        run "keystone ec2-credentials-create > demo.ec2"
-        run "nova secgroup-list"
-        run "cat demo.ec2"
       end
 
+      task :ec2, :roles => [:controller] do
+        set :user, "root"
+        set :default_environment, rc('demo')
+        run "keystone ec2-credentials-create > demo.ec2"
+        run "cat demo.ec2"
+      end
 
     end
 
