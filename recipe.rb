@@ -333,6 +333,8 @@ namespace :openstack do
       desc 'Bootstrap the demo user'
       task :default do
         demorc
+        keypair
+        sec_group
         ec2 
       end
 
@@ -345,19 +347,35 @@ namespace :openstack do
         end
       end
 
-      task :ec2, :roles => [:controller] do
+      task :keypair, :roles => [:controller] do
         set :user, "root"
         set :default_environment, rc('demo')
         run "nova keypair-add --pub_key /root/.ssh/id_rsa.pub jdoe_key"
+      end
+
+      # we allow all traffic on the default sec group as well
+      task :sec_group, :roles => [:controller] do
+        set :user, "root"
+        set :default_environment, rc('demo')
+        run "nova secgroup-add-rule default tcp 1 65535 0.0.0.0/0"
+        run "nova secgroup-add-rule default udp 1 65535 0.0.0.0/0"
+        run "nova secgroup-add-rule default icmp -1 -1 0.0.0.0/0"
+        run "nova secgroup-list-rules default"
         run "nova secgroup-create vm_jdoe_sec_group 'vm_jdoe_sec_group test security group'"
         run "nova secgroup-add-rule vm_jdoe_sec_group tcp 1 65535 0.0.0.0/0"
         run "nova secgroup-add-rule vm_jdoe_sec_group udp 1 65535 0.0.0.0/0"
         run "nova secgroup-add-rule vm_jdoe_sec_group icmp -1 -1 0.0.0.0/0"
         run "nova secgroup-list-rules vm_jdoe_sec_group"
+      end
+
+      task :ec2, :roles => [:controller] do
+        set :user, "root"
+        set :default_environment, rc('demo')
         run "keystone ec2-credentials-create > demo.ec2"
-        run "nova secgroup-list"
         run "cat demo.ec2"
       end
+
+
 
 
     end
