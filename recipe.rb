@@ -262,6 +262,7 @@ namespace :openstack do
       upload_keys
       images
       network
+      testrc
       admin_ec2
       quotas
       demo::default
@@ -306,6 +307,15 @@ namespace :openstack do
       nova_net = controllerAddress.gsub(/(\d)+\.(\d)+$/, c+".0/24")
       run "nova network-create net-jdoe --bridge br100 --multi-host T --fixed-range-v4 #{nova_net}"
       run "nova net-list"
+    end
+    
+    task :testrc, :roles => [:controller] do
+      set :user, "root"
+      rc = rc("test")
+      run "echo \"\" > testrc" 
+      rc.each do |k,v| 
+        run "echo \"export #{k}=#{v}\" >> testrc"
+      end
     end
 
     task :admin_ec2, :roles => [:controller] do
@@ -374,9 +384,6 @@ namespace :openstack do
         run "keystone ec2-credentials-create > demo.ec2"
         run "cat demo.ec2"
       end
-
-
-
 
     end
 
