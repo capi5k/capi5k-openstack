@@ -133,9 +133,10 @@ cd capi5k-openstack*
 bundle install --path ~/.gem
 ```
 
-### Configure and launch the deployment
-
 * Create the ```xp.conf```file from the ```xp.conf.sample```, adapt it to your needs.
+
+
+### Configure and launch the deployment
 
 * Launch the deployment :
 
@@ -224,13 +225,3 @@ nova keypair-list
 (laptop) ssh -NL 8000:parapluie-32-kavlan-16.rennes.grid5000.fr:80 access.grid5000.fr
 ```
 And then visit ```http://127.0.0.1:8000/horizon```
-
-## Customize the deployment
-
- * Change the config/xp5k/xp5k.rb file to fit your need.
- The VLAN must be set manually (even if it's now possible to automate using the API)
-
- * You'll find some tuning possibilities in templates/common.yml.erb
- The hiera store is generated using this file.
-
- * Some classes are overriden to fit into G5K  (see openstackg5k module)
