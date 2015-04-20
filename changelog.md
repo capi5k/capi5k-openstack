@@ -1,3 +1,7 @@
+# version 0.0.3
+
+* fix ceilometer installation
+
 # version 0.0.2
 
 * add sahara deployment

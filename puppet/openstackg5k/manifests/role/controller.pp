@@ -5,7 +5,7 @@ class openstackg5k::role::controller inherits ::openstack::role {
   class { '::openstack::profile::mysql': } ->
   class { '::openstack::profile::mongodb': } ->
   class { '::openstack::profile::keystone': } ->
-  class { '::openstack::profile::ceilometer::api': } ->
+  class { '::openstackg5k::profile::ceilometer::api': } ->
   class { '::openstack::profile::glance::auth': } ->
   class { '::openstackg5k::profile::glance::api': } ->
   class { '::openstack::profile::cinder::api': } ->
