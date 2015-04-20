@@ -1,3 +1,7 @@
+# version 0.0.4
+
+* TODO
+
 # version 0.0.3
 
 * fix ceilometer installation
