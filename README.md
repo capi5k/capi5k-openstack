@@ -12,6 +12,8 @@ capi5k-openstack
     * [Using Nova](#using-nova)
     * [Using EC2](#using-ec2)
     * [Using the web interface](#using-the-web-interface)
+  * [Miscellaneous](#miscellaneous)
+    * [Setting a cron job](#setting-a-cron-job)
 
 ## Overview
 
@@ -225,3 +227,25 @@ nova keypair-list
 (laptop) ssh -NL 8000:parapluie-32-kavlan-16.rennes.grid5000.fr:80 access.grid5000.fr
 ```
 And then visit ```http://127.0.0.1:8000/horizon```
+
+## Miscellaneous
+
+### Setting a cron job
+
+In order to automate the deployment every working day in the morning, a good solution is to use a [cron](http://en.wikipedia.org/wiki/Cron) on a frontend of Grid5000. 
+
+Before creating the cron, you should create a bash script containing the commands you need to execute. Here after, an example:
+
+```
+#!/bin/bash
+cd /home/<username>/<capi5k-openstack-folder>
+/home/<username>/.gem/ruby/1.9.1/gems/capistrano-2.15.5/bin/cap automatic > stdout.log 2> stderr.log
+```
+
+To create the cron, type `crontab -e` and put this line at the end:
+
+```
+0 9 * * mon-fri ~/deploy.bash
+```
+
+The script _deploy.bash_ will be executed at 9AM from Monday to Friday every week. 
