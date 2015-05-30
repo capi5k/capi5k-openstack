@@ -62,6 +62,8 @@ namespace :openstack do
     task :prepare, :roles => [:puppet_master], :on_error => :continue  do
       set :user, "root"
       run "rm -rf /etc/puppet/modules"
+      # fix an issue with wrong dependency
+      run "#{puppet_p} module install puppetlabs-concat -v 1.2.2" 
       run "#{puppet_p} module install puppetlabs-openstack -v 4.2.0"
       upload "#{openstack_path}/puppet/openstackg5k", "/etc/puppet/modules", :via => :scp, :recursive => :true
     end 
