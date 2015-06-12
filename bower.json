@@ -1,6 +1,6 @@
 {
   "name": "capi5k-openstack",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "homepage": "https://github.com/capi5k/capi5k-openstack",
   "authors": [
     "msimonin <matthieu.simonin@inria.fr>"
