@@ -34,5 +34,5 @@ images [{
   },
   {
   :name  => "ubuntu-hadoop-1.2.1",
-  :url   => "http://public.rennes.grid5000.fr/~gmoualla/images/sahara-icehouse-vanilla-1.2.1-ubuntu-13.10.qcow2"
+  :url   => "http://public.rennes.grid5000.fr/~msimonin/sahara-icehouse-vanilla-1.2.1-ubuntu-13.10.qcow2"
   }]

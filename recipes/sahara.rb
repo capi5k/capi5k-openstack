@@ -15,6 +15,8 @@ namespace :sahara do
     run "apt-get install -y python-pip"
     run "pip install MySQL-python"
     run "apt-get install -y python-pip libmysqlclient-dev python-dev"
+    # prevent from upgrading oslo the a newer version (something is wrong since 1.10.0)
+    run "#{proxy} pip install oslo.db==1.9.0"
     run "#{proxy} pip install sahara==2014.2.1"
     run "#{proxy} pip install sahara-dashboard==2014.1.3"
   end
