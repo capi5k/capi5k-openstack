@@ -1,6 +1,9 @@
 # version 0.0.4
 
-* TODO
+* fix oslo.db requirements for sahara (freeze to 1.9.0)
+* fix puppet concat requirements for openstack module (freeze to 1.2.2)
+* put the base image in ~msimonin public dir on grid5000
+* Add crontab doc for automatic deployment.
 
 # version 0.0.3
 
