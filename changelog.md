@@ -1,6 +1,6 @@
 # version 0.0.5
 
-  TODO
+  * freeze puppetlabs/apt to 1.8.0
 
 # version 0.0.4
 
