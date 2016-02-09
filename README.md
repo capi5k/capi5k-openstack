@@ -1,3 +1,5 @@
+> This script is deprecated in favor of : https://github.com/grid5000/xp5k-openstack
+
 capi5k-openstack
 =================
 
